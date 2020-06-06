@@ -7,7 +7,13 @@ import 'package:quiet/repository/netease.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:video_player/video_player.dart';
 
-import 'music_video_datail.dart';
+import 'music_video_detail.dart';
+
+extension VideoPlayerModelExt on BuildContext {
+  VideoPlayerModel get videoPlayer => VideoPlayerModel.of(this);
+
+  VideoPlayerModel get obtainVideoPlayer => VideoPlayerModel.of(this, rebuildOnChange: false);
+}
 
 ///播放中mv的model
 class VideoPlayerModel extends Model {

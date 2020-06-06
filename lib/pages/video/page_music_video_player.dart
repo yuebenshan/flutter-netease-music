@@ -5,16 +5,16 @@ import 'package:quiet/component/utils/utils.dart';
 import 'package:quiet/material/button.dart';
 import 'package:quiet/pages/artists/page_artist_detail.dart';
 import 'package:quiet/pages/comments/comments.dart';
-import 'package:quiet/pages/comments/page_comment.dart';
 import 'package:quiet/part/part.dart';
-import 'package:quiet/repository/netease.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:video_player/video_player.dart';
 
-import 'music_video_datail.dart';
 import 'page_music_video_player_fullscreen.dart';
+import 'scope_music_video.dart';
 import 'video_controller.dart';
 import 'video_player_model.dart';
+
+part 'page_mv_landscape.dart';
 
 ///MV详情页面
 ///顶部是视频播放
@@ -28,111 +28,52 @@ class MusicVideoPlayerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Widget widget = context.isLandscape ? _PageMusicVideoLandScape() : _PageMusicVideoPortrait();
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Container(
-            height: MediaQuery.of(context).padding.top,
-            color: Colors.black,
-          ),
-          Expanded(
-            child: MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              child: Loader(
-                  loadTask: () => neteaseRepository.mvDetail(mvId),
-                  builder: (context, result) {
-                    return _MvDetailPage(result: result);
-                  }),
-            ),
-          ),
-        ],
+      body: MusicVideoPageScope(
+        mvId: mvId,
+        child: widget,
       ),
     );
   }
 }
 
-class _MvDetailPage extends StatefulWidget {
-  ///response of [NeteaseRepository.mvDetail]
-  final Map result;
-
-  const _MvDetailPage({Key key, this.result}) : super(key: key);
-
-  @override
-  _MvDetailPageState createState() {
-    return new _MvDetailPageState();
-  }
-}
-
-class _MvDetailPageState extends State<_MvDetailPage> {
-  VideoPlayerModel _model;
-
-  bool _pausedPlayingMusic = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _model = VideoPlayerModel(MusicVideoDetail.fromJsonMap(widget.result['data']), subscribed: widget.result['subed']);
-    _model.videoPlayerController.play();
-    //TODO audio focus
-    if (context.player.playbackState.isPlaying) {
-      context.transportControls.pause();
-      _pausedPlayingMusic = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _model.videoPlayerController.dispose();
-    //try to resume paused music
-    if (_pausedPlayingMusic) {
-      context.transportControls.play();
-    }
-  }
-
+class _PageMusicVideoPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final commentId = CommentThreadId(_model.data.id, CommentType.mv);
-    return ScopedModel<VideoPlayerModel>(
-      model: _model,
-      child: ScopedModel<CommentList>(
-        model: CommentList(commentId),
-        child: Column(
-          children: <Widget>[
-            _SimpleMusicVideo(),
-            Expanded(child: ScopedModelDescendant<CommentList>(
-              builder: (context, child, model) {
-                List data = [];
-                data.addAll(MusicVideoFloor.values);
-                data.addAll(model.items);
+    return Column(
+      children: <Widget>[
+        _SimpleMusicVideo(),
+        Expanded(child: ScopedModelDescendant<CommentList>(
+          builder: (context, child, model) {
+            List data = [];
+            data.addAll(MusicVideoFloor.values);
+            data.addAll(model.items);
 
-                return NotificationListener<ScrollEndNotification>(
-                  onNotification: (notification) {
-                    model.loadMore(notification: notification);
-                    return false;
-                  },
-                  child: ListView.builder(
-                      itemCount: data.length,
-                      itemBuilder: model.createBuilder(data, builder: (context, index) {
-                        final item = data[index];
-                        switch (item) {
-                          case MusicVideoFloor.title:
-                            return _InformationSection();
-                          case MusicVideoFloor.actions:
-                            return _ActionsSection();
-                          case MusicVideoFloor.artists:
-                            return _ArtistSection();
-                        }
-                        assert(false, "error to build($index) for $item ");
-                        return Container();
-                      })),
-                );
+            return NotificationListener<ScrollEndNotification>(
+              onNotification: (notification) {
+                model.loadMore(notification: notification);
+                return false;
               },
-            )),
-          ],
-        ),
-      ),
+              child: ListView.builder(
+                  itemCount: data.length,
+                  itemBuilder: model.createBuilder(data, builder: (context, index) {
+                    final item = data[index];
+                    switch (item) {
+                      case MusicVideoFloor.title:
+                        return _InformationSection();
+                      case MusicVideoFloor.actions:
+                        return _ActionsSection();
+                      case MusicVideoFloor.artists:
+                        return _ArtistSection();
+                    }
+                    assert(false, "error to build($index) for $item ");
+                    return Container();
+                  })),
+            );
+          },
+        )),
+      ],
     );
   }
 }
@@ -234,7 +175,7 @@ class _SimpleVideoController extends StatelessWidget {
                   DeviceOrientation.landscapeLeft,
                   DeviceOrientation.landscapeRight,
                 ]);
-                await Navigator.push(context, route);
+                await Navigator.of(context, rootNavigator: true).push(route);
                 SystemChrome.setPreferredOrientations(const [
                   DeviceOrientation.portraitUp,
                   DeviceOrientation.portraitDown,
@@ -302,8 +243,10 @@ class _InformationSectionState extends State<_InformationSection> {
   Widget build(BuildContext context) {
     final data = VideoPlayerModel.of(context).data;
 
+    final bool hasDescription = data.desc != null && data.desc.isNotEmpty;
+
     Widget description;
-    if (_expanded && data.desc != null) {
+    if (_expanded && hasDescription) {
       description = Padding(
         padding: const EdgeInsets.only(top: 8),
         child: Text(
@@ -316,7 +259,7 @@ class _InformationSectionState extends State<_InformationSection> {
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -347,12 +290,14 @@ class _InformationSectionState extends State<_InformationSection> {
               Visibility(
                 visible: data.desc != null,
                 child: IconButton(
-                  icon: Icon(_expanded ? Icons.arrow_drop_up : Icons.arrow_drop_down),
-                  onPressed: () {
-                    setState(() {
-                      _expanded = !_expanded;
-                    });
-                  },
+                  icon: Icon(_expanded && hasDescription ? Icons.arrow_drop_up : Icons.arrow_drop_down),
+                  onPressed: !hasDescription
+                      ? null
+                      : () {
+                          setState(() {
+                            _expanded = !_expanded;
+                          });
+                        },
                 ),
               )
             ],
@@ -371,8 +316,7 @@ class _ActionsSection extends StatelessWidget {
     final data = VideoPlayerModel.of(context).data;
     return DividerWrapper(
       child: ButtonTheme(
-        textTheme: ButtonTextTheme.accent,
-        colorScheme: ColorScheme.light(secondary: Colors.black54),
+        textTheme: ButtonTextTheme.normal,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
@@ -439,6 +383,10 @@ class _SubscribeButton extends StatelessWidget {
 }
 
 class _ArtistSection extends StatelessWidget {
+  final bool hasBottomDivider;
+
+  const _ArtistSection({Key key, this.hasBottomDivider = true}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     var data = VideoPlayerModel.of(context).data;
@@ -452,10 +400,11 @@ class _ArtistSection extends StatelessWidget {
 
     return Column(children: [
       widget,
-      Container(
-        color: Theme.of(context).dividerColor,
-        height: 8,
-      )
+      if (hasBottomDivider)
+        Container(
+          color: Theme.of(context).dividerColor,
+          height: 8,
+        )
     ]);
   }
 

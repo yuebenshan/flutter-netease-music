@@ -30,6 +30,8 @@ class FullScreenMvPlayerState extends State<FullScreenMvPlayer> {
     final value = VideoPlayerModel.of(context).playerValue;
     return Scaffold(
       backgroundColor: Colors.black,
+      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomPadding: false,
       body: Stack(
         children: <Widget>[
           Center(
@@ -37,7 +39,10 @@ class FullScreenMvPlayerState extends State<FullScreenMvPlayer> {
                 aspectRatio: value.initialized ? value.aspectRatio : 1,
                 child: VideoPlayer(VideoPlayerModel.of(context).videoPlayerController)),
           ),
-          _FullScreenController(),
+          AnimatedPadding(
+              padding: EdgeInsetsDirectional.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              duration: const Duration(milliseconds: 300),
+              child: _FullScreenController()),
         ],
       ),
     );
