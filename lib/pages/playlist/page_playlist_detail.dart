@@ -69,6 +69,7 @@ class _PlayListDetailState extends State<PlaylistDetailPage> {
       resizeToAvoidBottomInset: false,
       body: BoxWithBottomPlayerController(
         Loader<PlaylistDetail>(
+            key: ValueKey(widget.playlistId),
             initialData: neteaseLocalData.getPlaylistDetail(widget.playlistId),
             loadTask: () => neteaseRepository.playlistDetail(widget.playlistId),
             loadingBuilder: (context) {

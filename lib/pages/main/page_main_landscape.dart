@@ -15,6 +15,8 @@ const _navigationFmPlayer = "fm";
 
 const _navigationSettings = "settings";
 
+const List<String> _navigations = [_navigationSearch, _navigationMyPlaylist, _navigationCloud, _navigationFmPlayer];
+
 class _LandscapeMainPageState extends State<_LandscapeMainPage> with NavigatorObserver {
   static const double DRAWER_WIDTH = 120.0;
 
@@ -64,22 +66,12 @@ class _LandscapeMainPageState extends State<_LandscapeMainPage> with NavigatorOb
                         border: BorderDirectional(end: BorderSide(color: Theme.of(context).dividerColor))),
                     child: _LandscapeDrawer(selectedRouteName: _currentSubRouteName),
                   ),
-                  Flexible(
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border: BorderDirectional(end: BorderSide(color: Theme.of(context).dividerColor))),
-                      child: Navigator(
-                        key: _landscapeNavigatorKey,
-                        initialRoute: _navigationMyPlaylist,
-                        observers: [this],
-                        onGenerateRoute: _onGeneratePrimaryRoute,
+                  Expanded(
+                    child: OverlapNavigator(
+                      child: ScreenSplitWidget(
+                        start: MainPlaylistPage(),
+                        end: _SecondaryPlaceholder(),
                       ),
-                    ),
-                  ),
-                  Flexible(
-                    child: Navigator(
-                      key: _landscapeSecondaryNavigatorKey,
-                      onGenerateRoute: _onGenerateSecondaryRoute,
                     ),
                   ),
                 ],
@@ -93,47 +85,25 @@ class _LandscapeMainPageState extends State<_LandscapeMainPage> with NavigatorOb
       ),
     );
   }
+}
 
-  Route<dynamic> _onGeneratePrimaryRoute(RouteSettings settings) {
-    Widget widget;
-    switch (settings.name) {
-      case _navigationMyPlaylist:
-        widget = Scaffold(
-          body: MainPlaylistPage(),
-          primary: false,
-          resizeToAvoidBottomInset: false,
-        );
-        break;
-      case _navigationCloud:
-        widget = Scaffold(
-          body: MainCloudPage(),
-          primary: false,
-          resizeToAvoidBottomInset: false,
-        );
-        break;
-      case _navigationSearch:
-        return NeteaseSearchPageRoute(null);
-      case _navigationFmPlayer:
-        toast("页面未完成");
-        widget = Container();
-        break;
-      case _navigationSettings:
-        widget = SettingPage();
-        break;
-    }
-    assert(widget != null, "can not generate route for $settings");
-    return MaterialPageRoute(settings: settings, builder: (context) => widget);
-  }
+class ScreenSplitWidget extends StatelessWidget {
+  final Widget start;
+  final Widget end;
 
-  Route<dynamic> _onGenerateSecondaryRoute(RouteSettings settings) {
-    if (settings.name == Navigator.defaultRouteName) {
-      return MaterialPageRoute(settings: settings, builder: (context) => _SecondaryPlaceholder());
-    }
-    final builder = routes[settings.name];
-    if (builder != null) {
-      return MaterialPageRoute(settings: settings, builder: builder);
-    }
-    return routeFactory(settings);
+  const ScreenSplitWidget({Key key, @required this.start, @required this.end})
+      : assert(start != null),
+        assert(end != null),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Flexible(child: start),
+        Flexible(child: end),
+      ],
+    );
   }
 }
 

@@ -45,8 +45,13 @@ class PlaylistTile extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        context.secondaryNavigator
-            .push(MaterialPageRoute(builder: (context) => PlaylistDetailPage(playlist.id, playlist: playlist)));
+        WidgetBuilder builder = (context) => PlaylistDetailPage(playlist.id, playlist: playlist);
+        if (context.isLandscape) {
+          context.overlapNavigator.push(builder);
+        } else {
+          context.navigator
+              .push(MaterialPageRoute(builder: (context) => PlaylistDetailPage(playlist.id, playlist: playlist)));
+        }
       },
       child: Container(
         height: 60,

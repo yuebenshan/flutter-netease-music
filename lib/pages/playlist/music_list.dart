@@ -270,10 +270,7 @@ class IconMV extends StatelessWidget {
         icon: Icon(Icons.videocam),
         tooltip: 'MV',
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => MusicVideoPlayerPage(music.mvId)),
-          );
+          context.primaryNavigator.push(MaterialPageRoute(builder: (context) => MusicVideoPlayerPage(music.mvId)));
         });
   }
 }
