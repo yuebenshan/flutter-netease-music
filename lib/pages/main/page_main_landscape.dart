@@ -67,10 +67,12 @@ class _LandscapeMainPageState extends State<_LandscapeMainPage> with NavigatorOb
                     child: _LandscapeDrawer(selectedRouteName: _currentSubRouteName),
                   ),
                   Expanded(
-                    child: OverlapNavigator(
-                      child: ScreenSplitWidget(
-                        start: MainPlaylistPage(),
-                        end: _SecondaryPlaceholder(),
+                    child: _LandScapeNavigator(
+                      home: OverlapNavigator(
+                        child: ScreenSplitWidget(
+                          start: MainPlaylistPage(),
+                          end: _SecondaryPlaceholder(),
+                        ),
                       ),
                     ),
                   ),
@@ -82,6 +84,41 @@ class _LandscapeMainPageState extends State<_LandscapeMainPage> with NavigatorOb
             paddingPageBottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LandScapeNavigator extends StatefulWidget {
+  final Widget home;
+
+  _LandScapeNavigator({Key key, this.home}) : super(key: key);
+
+  @override
+  _LandScapeNavigatorState createState() => _LandScapeNavigatorState();
+}
+
+class _LandScapeNavigatorState extends State<_LandScapeNavigator> {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey(debugLabel: "landscape navigator");
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        final NavigatorState navigator = _navigatorKey.currentState;
+        if (navigator == null) {
+          return true;
+        }
+        final bool handled = await _navigatorKey.currentState.maybePop();
+        return !handled;
+      },
+      child: Navigator(
+        key: _navigatorKey,
+        onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
+          return [
+            MaterialPageRoute(builder: (context) => widget.home),
+          ];
+        },
       ),
     );
   }

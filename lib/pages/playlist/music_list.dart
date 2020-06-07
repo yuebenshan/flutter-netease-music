@@ -7,6 +7,7 @@ import 'package:quiet/pages/artists/page_artist_detail.dart';
 import 'package:quiet/pages/comments/page_comment.dart';
 import 'package:quiet/part/part.dart';
 import 'package:quiet/repository/netease.dart';
+import 'package:quiet/material.dart';
 
 import 'dialog_selector.dart';
 
@@ -270,7 +271,7 @@ class IconMV extends StatelessWidget {
         icon: Icon(Icons.videocam),
         tooltip: 'MV',
         onPressed: () {
-          context.primaryNavigator.push(MaterialPageRoute(builder: (context) => MusicVideoPlayerPage(music.mvId)));
+          context.navigator.push(MaterialPageRoute(builder: (context) => MusicVideoPlayerPage(music.mvId)));
         });
   }
 }

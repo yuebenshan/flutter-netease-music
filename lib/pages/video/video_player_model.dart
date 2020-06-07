@@ -117,6 +117,9 @@ class _VideoPlayerControllerWrapper extends VideoPlayerController {
 
   @override
   Future<void> dispose() {
+    if (_disposed) {
+      return Future.value();
+    }
     _disposed = true;
     return super.dispose();
   }

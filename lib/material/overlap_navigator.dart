@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 const double _kMinFlingVelocity = 365.0;
 const Duration _kAnimationDuration = Duration(milliseconds: 300);
 
+/// Not considering the loss of Route caused
+/// when switching between horizontal and vertical screens.
 class OverlapNavigator extends StatefulWidget {
   final Widget child;
 
@@ -32,8 +34,6 @@ class OverlapNavigator extends StatefulWidget {
 
 extension OverlapNavigatorContextExt on BuildContext {
   OverlapNavigatorHandle get overlapNavigator => OverlapNavigator.of(this);
-
-  OverlapNavigatorHandle get rootOverlapNavigator => OverlapNavigator.of(this, root: true);
 }
 
 abstract class OverlapNavigatorHandle {
