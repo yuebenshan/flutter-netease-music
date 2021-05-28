@@ -19,6 +19,7 @@ class _MainPageMyState extends State<MainPageMy> with AutomaticKeepAliveClientMi
   ScrollController _scrollController = ScrollController();
 
   TabController _tabController;
+  PageController _pageController;
 
   bool _scrollerAnimating = false;
   bool _tabAnimating = false;
@@ -27,15 +28,18 @@ class _MainPageMyState extends State<MainPageMy> with AutomaticKeepAliveClientMi
   void initState() {
     super.initState();
     _tabController = TabController(length: PlayListType.values.length, vsync: this);
+    _pageController = PageController(initialPage: 0);
     _tabController.addListener(_onUserSelectedTab);
   }
 
+  // 三个菜单切换
   void _onUserSelectedTab() {
     logger.info("_onUserSelectedTab : ${_tabController.index} ${_tabController.indexIsChanging}");
+    _pageController.animateToPage(_tabController.index, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     if (_scrollerAnimating || _tabAnimating) {
       return;
     }
-    _scrollToPlayList(PlayListType.values[_tabController.index]);
+    // _scrollToPlayList(PlayListType.values[_tabController.index]);
   }
 
   @override
@@ -55,7 +59,7 @@ class _MainPageMyState extends State<MainPageMy> with AutomaticKeepAliveClientMi
           delegate: SliverChildListDelegate(
             [
               UserProfileSection(),
-              PresetGridSection(),
+              // PresetGridSection(),
               SizedBox(height: 8),
             ],
           ),
@@ -71,7 +75,7 @@ class _MainPageMyState extends State<MainPageMy> with AutomaticKeepAliveClientMi
           },
           child: UserPlayListSection(
             userId: userId,
-            scrollController: _scrollController,
+            pageController: _pageController,
           ),
         ),
       ],
@@ -113,46 +117,6 @@ class _MainPageMyState extends State<MainPageMy> with AutomaticKeepAliveClientMi
     callback(sliverKey, children, start, end);
   }
 
-  void _scrollToPlayList(PlayListType type) {
-    _scrollerAnimating = true;
-
-    _computeScroller((sliverKey, children, start, end) {
-      final target = type == PlayListType.created ? sliverKey.createdPosition : sliverKey.favoritePosition;
-      final position = _scrollController.position;
-      if (target >= start && target <= end) {
-        Element toShow = children[target - start];
-        position
-            .ensureVisible(toShow.renderObject, duration: const Duration(milliseconds: 300), curve: Curves.linear)
-            .whenComplete(() {
-          _scrollerAnimating = false;
-        });
-      } else if (target < start) {
-        position
-            .ensureVisible(
-          children.first.renderObject,
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.linear,
-        )
-            .then((_) {
-          WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
-            _scrollToPlayList(type);
-          });
-        });
-      } else if (target > end) {
-        position
-            .ensureVisible(
-          children.last.renderObject,
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.linear,
-        )
-            .then((_) {
-          WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
-            _scrollToPlayList(type);
-          });
-        });
-      }
-    });
-  }
 
   static int _index(Element element) {
     int index;

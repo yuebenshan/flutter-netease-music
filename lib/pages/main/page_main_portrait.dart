@@ -15,7 +15,7 @@ class _MainPageState extends State<_PortraitMainPage> with SingleTickerProviderS
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -34,12 +34,17 @@ class _MainPageState extends State<_PortraitMainPage> with SingleTickerProviderS
         iconTheme: Theme.of(context).iconTheme,
         leading: IconButton(
             icon: Icon(Icons.menu),
-            onPressed: () {
-              _scaffoldKey.currentState.openDrawer();
+            onPressed: () async {
+              // _scaffoldKey.currentState.openDrawer();
+              // if(UserAccount.of(context).isLogin) {
+                if (await showConfirmDialog(context, Text('确认退出登录吗？'), positiveLabel: '退出登录')) {
+                  UserAccount.of(context, rebuildOnChange: false).logout();
+                }
+              // }
             }),
         title: Container(
           height: kToolbarHeight,
-          width: 128,
+          width: 228,
           child: TabBar(
             labelColor: Theme.of(context).textTheme.bodyText1.color,
             unselectedLabelColor: Theme.of(context).textTheme.caption.color,
@@ -50,6 +55,7 @@ class _MainPageState extends State<_PortraitMainPage> with SingleTickerProviderS
             tabs: <Widget>[
               _PageTab(text: context.strings.main_page_tab_title_my),
               _PageTab(text: context.strings.main_page_tab_title_discover),
+              _PageTab(text: context.strings.main_page_tab_title_history),
             ],
           ),
         ),
@@ -68,7 +74,7 @@ class _MainPageState extends State<_PortraitMainPage> with SingleTickerProviderS
       ),
       body: BoxWithBottomPlayerController(TabBarView(
         controller: _tabController,
-        children: <Widget>[MainPageMy(), MainPageDiscover()],
+        children: <Widget>[MainPageMy(), MainPageDiscover(), MainPageDiscover()],
       )),
     );
   }

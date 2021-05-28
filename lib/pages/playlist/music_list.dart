@@ -146,7 +146,7 @@ class MusicTile extends StatelessWidget {
           children: <Widget>[
             (list.leadingBuilder ?? _buildPadding)(context, music),
             Expanded(
-              child: _SimpleMusicTile(music),
+              child: SimpleMusicTile(music),
             ),
             (list.trailingBuilder ?? _buildPadding)(context, music),
           ],
@@ -156,10 +156,10 @@ class MusicTile extends StatelessWidget {
   }
 }
 
-class _SimpleMusicTile extends StatelessWidget {
+class SimpleMusicTile extends StatelessWidget {
   final Music music;
 
-  const _SimpleMusicTile(this.music, {Key key}) : super(key: key);
+  const SimpleMusicTile(this.music, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -197,16 +197,17 @@ class _SimpleMusicTile extends StatelessWidget {
 
 /// The header view of MusicList
 class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
-  MusicListHeader(this.count, {this.tail});
+  MusicListHeader(this.count, {this.tail, this.noHeader = false});
 
   final int count;
+  final bool noHeader;
 
   final Widget tail;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(noHeader ? 0 : 16)),
       child: Material(
         color: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,

@@ -85,7 +85,7 @@ class MyApp extends StatelessWidget {
                 child: MaterialApp(
                   routes: routes,
                   onGenerateRoute: routeFactory,
-                  title: 'Quiet',
+                  title: '学习',
                   supportedLocales: [const Locale("en"), const Locale("zh")],
                   localizationsDelegates: [
                     GlobalWidgetsLocalizations.delegate,

@@ -26,6 +26,7 @@ class QuietLocalizations {
     "en": {
       "main_page_tab_title_my": "My",
       "main_page_tab_title_discover": "Discover",
+      "main_page_tab_title_history": "history",
       "local_music": "Local Music",
       "cloud_music": "Could Space",
       "latest_play_history": "Play History",
@@ -36,8 +37,9 @@ class QuietLocalizations {
       "todo": "TBD",
       "login_right_now": "Login",
       "playlist_login_description": "Login to discover your playlists.",
-      "created_song_list": "Created Song List",
-      "favorite_song_list": "Favorite Song List",
+      "favorite_article_list": "收藏文章",
+      "favorite_album_list": "收藏专辑",
+      "favorite_anthology_list": "收藏选集",
       "playlist_share_content": "The PlayList created by {username}「{title}」: "
           "http://music.163.com/playlist/{playlistId}/{userId}/?userid={shareUserId} (From @NeteaseCouldMusic)",
       "share_content_copied": "Share content has copied to clipboard.",
@@ -47,6 +49,7 @@ class QuietLocalizations {
     "zh": {
       "main_page_tab_title_my": "我的",
       "main_page_tab_title_discover": "发现",
+      "main_page_tab_title_history": "浏览",
       "local_music": "本地音乐",
       "cloud_music": "云盘",
       "latest_play_history": "最近播放",
@@ -57,8 +60,9 @@ class QuietLocalizations {
       "todo": "TBD",
       "login_right_now": "立即登录",
       "playlist_login_description": "登录以加载你的私人播放列表。",
-      "created_song_list": "创建歌单",
-      "favorite_song_list": "收藏歌单",
+      "favorite_article_list": "收藏文章",
+      "favorite_album_list": "收藏专辑",
+      "favorite_anthology_list": "收藏选集",
       "playlist_share_content": "分享{username}创建的歌单「{title}」: "
           "http://music.163.com/playlist/{playlistId}/{userId}/?userid={shareUserId} (来自@网易云音乐)",
       "share_content_copied": "分享内容已复制到剪切板",
@@ -81,6 +85,10 @@ class QuietLocalizations {
 // ignore: non_constant_identifier_names
   String get main_page_tab_title_discover {
     return _localizedValues[locale.languageCode]["main_page_tab_title_discover"];
+  }
+  // ignore: non_constant_identifier_names
+  String get main_page_tab_title_history {
+    return _localizedValues[locale.languageCode]["main_page_tab_title_history"];
   }
 }
 

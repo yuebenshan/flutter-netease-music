@@ -87,7 +87,7 @@ class _PlayListDetailState extends State<PlaylistDetailPage> {
             },
             builder: (context, result) {
               if (result == null) return _buildLoading(context);
-              return _PlaylistBody(result);
+              return PlaylistBody(result);
             }),
       ),
     );
@@ -95,10 +95,12 @@ class _PlayListDetailState extends State<PlaylistDetailPage> {
 }
 
 ///body display the list of song item and a header of playlist
-class _PlaylistBody extends StatefulWidget {
-  _PlaylistBody(this.playlist) : assert(playlist != null);
+class PlaylistBody extends StatefulWidget {
+  PlaylistBody(this.playlist, {this.noHeader = false, this.count = 0}) : assert(playlist != null);
 
   final PlaylistDetail playlist;
+  final bool noHeader;
+  final int count;
 
   List<Music> get musicList => playlist.musicList;
 
@@ -108,7 +110,7 @@ class _PlaylistBody extends StatefulWidget {
   }
 }
 
-class _PlaylistBodyState extends State<_PlaylistBody> {
+class _PlaylistBodyState extends State<PlaylistBody> {
   @override
   Widget build(BuildContext context) {
     return MusicTileConfiguration(
@@ -130,14 +132,22 @@ class _PlaylistBodyState extends State<_PlaylistBody> {
       leadingBuilder: MusicTileConfiguration.indexedLeadingBuilder,
       trailingBuilder: MusicTileConfiguration.defaultTrailingBuilder,
       child: CustomScrollView(
+        shrinkWrap: true,
         slivers: <Widget>[
-          SliverAppBar(
+          widget.noHeader ? SliverAppBar(
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            title: _buildListHeader(context),
+            titleSpacing: 10,
+            backgroundColor: Colors.transparent,
+            expandedHeight: 0,
+          ) : SliverAppBar(
             elevation: 0,
             pinned: true,
             automaticallyImplyLeading: false,
+            bottom: _buildListHeader(context),
             backgroundColor: Colors.transparent,
             expandedHeight: HEIGHT_HEADER,
-            bottom: _buildListHeader(context),
             flexibleSpace: _PlaylistDetailHeader(widget.playlist),
           ),
           SliverList(
@@ -172,7 +182,7 @@ class _PlaylistBodyState extends State<_PlaylistBody> {
     if (!owner) {
       tail = _SubscribeButton(widget.playlist.subscribed, widget.playlist.subscribedCount, _doSubscribeChanged);
     }
-    return MusicListHeader(widget.musicList.length, tail: tail);
+    return MusicListHeader(widget.musicList.length, tail: tail, noHeader: widget.noHeader);
   }
 }
 
@@ -201,7 +211,7 @@ class _SubscribeButtonState extends State<_SubscribeButton> {
 
   @override
   Widget build(BuildContext context) {
-    if (!subscribed) {
+    if (!(subscribed??false)) {
       return ClipRRect(
         borderRadius: BorderRadius.all(Radius.circular(16)),
         child: Container(
@@ -406,9 +416,11 @@ class _PlaylistDetailHeader extends StatelessWidget {
       background: PlayListHeaderBackground(imageUrl: playlist.coverUrl),
       content: _buildContent(context),
       builder: (context, t) => AppBar(
+        textTheme: Theme.of(context).textTheme,
+        iconTheme: Theme.of(context).iconTheme,
         leading: context.isLandscape ? null : BackButton(),
         automaticallyImplyLeading: false,
-        title: Text(t > 0.5 ? playlist.name : '歌单'),
+        title: Text(t > 0.5 ? playlist.name : '歌单',),
         backgroundColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 16,

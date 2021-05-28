@@ -127,7 +127,7 @@ class QuietModel extends Model {
     });
 
     player.isMusicServiceAvailable().then((available) {
-      if (available) {
+      if (available??true) {
         return;
       }
       final MusicMetadata metadata = data.restoreMetadata();

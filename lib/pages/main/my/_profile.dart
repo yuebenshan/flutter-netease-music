@@ -4,6 +4,7 @@ import 'package:quiet/component.dart';
 import 'package:quiet/model.dart';
 import 'package:quiet/pages/account/account.dart';
 import 'package:quiet/pages/account/page_user_detail.dart';
+import 'package:quiet/pages/record/page_record.dart';
 
 class UserProfileSection extends StatelessWidget {
   const UserProfileSection({Key key}) : super(key: key);
@@ -66,7 +67,18 @@ class UserProfileSection extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right)
+              GestureDetector(
+                onTap: () {
+                  if (UserAccount.of(context, rebuildOnChange: false).isLogin) {
+                    context.secondaryNavigator.push(MaterialPageRoute(builder: (context) {
+                      return RecordPage(uid: UserAccount.of(context, rebuildOnChange: false).userId);
+                    }));
+                  } else {
+                    Navigator.of(context).pushNamed(pageLogin);
+                  }
+                },
+                child: Icon(Icons.play_circle_outline),
+              )
             ],
           ),
         ),

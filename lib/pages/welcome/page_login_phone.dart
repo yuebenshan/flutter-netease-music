@@ -159,11 +159,13 @@ void _next(BuildContext context) async {
     toast('请输入手机号');
     return;
   }
+  final bool isProduct = const bool.fromEnvironment('dart.vm.product');
+  final String dialCode = model.region.dialCode.replaceAll("+", "").replaceAll(" ", "");
   final result = await showLoaderOverlay(
       context,
       WelcomeRepository.checkPhoneExist(
         text,
-        model.region.dialCode.replaceAll("+", "").replaceAll(" ", ""),
+        isProduct ? dialCode : '86',
       ));
   if (result.isError) {
     toast(result.asError.error.toString());

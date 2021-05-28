@@ -265,6 +265,7 @@ class LyricPainter extends ChangeNotifier implements CustomPainter {
   LyricPainter(TextStyle style, this.lyric, {this.textAlign = TextAlign.center, Color highlight = Colors.red}) {
     assert(lyric != null);
     lyricPainters = [];
+    // 歌词的绘图
     for (int i = 0; i < lyric.size; i++) {
       var painter = TextPainter(text: TextSpan(style: style, text: lyric[i].line), textAlign: textAlign);
       painter.textDirection = TextDirection.ltr;

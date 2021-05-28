@@ -1,17 +1,17 @@
 part of 'settings.dart';
 
 //网易红调色板
-const _swatchNeteaseRed = const MaterialColor(0xFFdd4237, {
-  900: const Color(0xFFae2a20),
-  800: const Color(0xFFbe332a),
-  700: const Color(0xFFcb3931),
-  600: const Color(0xFFdd4237),
-  500: const Color(0xFFec4b38),
-  400: const Color(0xFFe85951),
-  300: const Color(0xFFdf7674),
-  200: const Color(0xFFea9c9a),
-  100: const Color(0xFFfcced2),
-  50: const Color(0xFFfeebee),
+const _swatchNeteaseRed = const MaterialColor(0xFFFF6800, {
+  900: const Color(0xffff6800),
+  800: const Color(0xffbe652a),
+  700: const Color(0xffcb6f31),
+  600: const Color(0xffdd7137),
+  500: const Color(0xffec8038),
+  400: const Color(0xffe88151),
+  300: const Color(0xffdf9674),
+  200: const Color(0xffeab39a),
+  100: const Color(0xfffce0ce),
+  50: const Color(0xfffef2eb),
 });
 
 //app主题

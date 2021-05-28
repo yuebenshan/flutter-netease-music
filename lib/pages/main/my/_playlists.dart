@@ -3,12 +3,13 @@ import 'package:flutter/rendering.dart';
 import 'package:logging/logging.dart';
 import 'package:quiet/component.dart';
 import 'package:quiet/model/playlist_detail.dart';
+import 'package:quiet/pages/playlist/music_list.dart';
 import 'package:quiet/part/part.dart';
 import 'package:quiet/repository/netease.dart';
 
 import '../playlist_tile.dart';
 
-enum PlayListType { created, favorite }
+enum PlayListType { article, album, anthology }
 
 class PlayListsGroupHeader extends StatelessWidget {
   final String name;
@@ -30,8 +31,6 @@ class PlayListsGroupHeader extends StatelessWidget {
             children: [
               Text("$name($count)"),
               Spacer(),
-              Icon(Icons.add),
-              Icon(Icons.more_vert),
             ],
           ),
         ),
@@ -108,8 +107,9 @@ class _MyPlayListsHeader extends StatelessWidget implements PreferredSizeWidget 
         labelColor: Theme.of(context).textTheme.bodyText1.color,
         indicatorSize: TabBarIndicatorSize.label,
         tabs: [
-          Tab(text: context.strings["created_song_list"]),
-          Tab(text: context.strings["favorite_song_list"]),
+          Tab(text: context.strings["favorite_article_list"]),
+          Tab(text: context.strings["favorite_album_list"]),
+          Tab(text: context.strings["favorite_anthology_list"]),
         ],
       ),
     );
@@ -133,11 +133,11 @@ class UserPlayListSection extends StatefulWidget {
   const UserPlayListSection({
     Key key,
     @required this.userId,
-    this.scrollController,
+    this.pageController,
   }) : super(key: key);
 
   final int userId;
-  final ScrollController scrollController;
+  final PageController pageController;
 
   @override
   _UserPlayListSectionState createState() => _UserPlayListSectionState();
@@ -153,38 +153,18 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
   @override
   void initState() {
     super.initState();
-    widget.scrollController.addListener(_onScrolled);
   }
 
   @override
   void didUpdateWidget(covariant UserPlayListSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    oldWidget.scrollController.removeListener(_onScrolled);
-    widget.scrollController.addListener(_onScrolled);
   }
 
   @override
   void dispose() {
     super.dispose();
-    widget.scrollController.removeListener(_onScrolled);
   }
 
-  void _onScrolled() {
-    if (_dividerIndex < 0) {
-      return;
-    }
-    final RenderSliverList global = context.findRenderObject();
-    RenderObject child = global.firstChild;
-    while (child != null && global.indexOf(child) != _dividerIndex) {
-      child = global.childAfter(child);
-    }
-    if (child == null) {
-      return;
-    }
-    final offset = global.childMainAxisPosition(child);
-    const height = _kPlayListHeaderHeight + _kPlayListDividerHeight / 2;
-    PlayListTypeNotification(type: offset > height ? PlayListType.created : PlayListType.favorite).dispatch(context);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,19 +183,38 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
           return _singleSliver(child: Loader.buildSimpleFailedWidget(context, result));
         },
         builder: (context, result) {
-          final created = result.where((p) => p.creator["userId"] == widget.userId);
+          final created = result.where((p) => p.creator["userId"] == widget.userId).toList();
           final subscribed = result.where((p) => p.creator["userId"] != widget.userId);
           _dividerIndex = 2 + created.length;
           return SliverList(
             key: PlayListSliverKey(createdPosition: 1, favoritePosition: 3 + created.length),
             delegate: SliverChildListDelegate.fixed([
-              SizedBox(height: _kPlayListDividerHeight),
-              PlayListsGroupHeader(name: context.strings["created_song_list"], count: created.length),
-              ..._playlistWidget(created),
-              SizedBox(height: _kPlayListDividerHeight, key: _dividerKey),
-              PlayListsGroupHeader(name: context.strings["favorite_song_list"], count: subscribed.length),
-              ..._playlistWidget(subscribed),
-              SizedBox(height: _kPlayListDividerHeight),
+              Container(
+                height: MediaQuery.of(context).size.height - 270,
+                child: PageView(
+                  physics: NeverScrollableScrollPhysics(),
+                  controller: widget.pageController,
+                  children: [
+                    ..._playlistWidget(created, item: true),
+                    Container(
+                      color: Colors.white,
+                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      child: ListView(
+                        padding: EdgeInsets.only(top: 20),
+                        children: _playlistWidget(subscribed),
+                      ),
+                    ),
+                    Container(
+                      color: Colors.white,
+                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      child: ListView(
+                        padding: EdgeInsets.only(top: 20),
+                        children: _playlistWidget(subscribed),
+                      ),
+                    ),
+                  ],
+                ),
+              )
             ], addAutomaticKeepAlives: false),
           );
         });
@@ -237,16 +236,34 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
       ),
     );
   }
+  static Iterable<Widget> _playlistItemWidget() {
+    final List<Widget> widgets = <Widget>[];
+    return widgets;
+  }
 
-  static Iterable<Widget> _playlistWidget(Iterable<PlaylistDetail> details) {
+  static Iterable<Widget> _playlistWidget(Iterable<PlaylistDetail> details, {bool item}) {
     if (details.isEmpty) {
       return const [];
     }
     final list = details.toList(growable: false);
     final List<Widget> widgets = <Widget>[];
-    for (int i = 0; i < list.length; i++) {
-      widgets.add(MainPlayListTile(data: list[i], enableBottomRadius: i == list.length - 1));
+    if(item??false) {
+      widgets.add(Container(
+        color: Colors.white,
+        margin: EdgeInsets.only(left: 16, right: 16),
+        padding: EdgeInsets.only(top: 10),
+        child: FutureBuilder<PlaylistDetail>(
+            future: neteaseLocalData.getPlaylistDetail(details.first.id),
+            builder: (context, result) {
+              return result?.data == null ? Container() : PlaylistBody(result?.data, noHeader: true, count: result?.data?.musicList?.length);
+            }),
+      ));
+    } else {
+      for (int i = 0; i < list.length; i++) {
+        widgets.add(MainPlayListTile(data: list[i], enableBottomRadius: i == list.length - 1));
+      }
     }
+
     return widgets;
   }
 
