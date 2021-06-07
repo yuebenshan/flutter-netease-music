@@ -5,95 +5,146 @@ import 'package:quiet/pages/playlist/page_playlist_detail.dart';
 import 'package:quiet/part/part.dart';
 import 'package:quiet/repository/netease.dart';
 
-class MainPageDiscover extends StatefulWidget {
+class MainPageHistory extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => CloudPageState();
 }
 
-class CloudPageState extends State<MainPageDiscover> with AutomaticKeepAliveClientMixin {
+class CloudPageState extends State<MainPageHistory> with AutomaticKeepAliveClientMixin {
+  PageController _pageController = PageController(initialPage: 0);
+
+  int activeIndex = 0;
+
   @override
   bool get wantKeepAlive => true;
+  StateSetter _navigationLineState;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _pageController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ListView(
+    return Column(
       children: <Widget>[
-        _NavigationLine(),
-        _Header("最新文章", () {}),
-        SectionNewSongs(),
-        _Header("最新专辑", () {}),
-        SectionPlaylist(limit: 6,),
-        _Header("最新选集", () {}),
-        SectionPlaylist(limit: 6,),
+        StatefulBuilder(builder: (context, navigationLineState) {
+          _navigationLineState = navigationLineState;
+          return _NavigationLine(
+              pageCtrl: _pageController,
+              activeIndex: activeIndex
+          );
+        }),
+        Expanded(child: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            activeIndex = index;
+            _navigationLineState(() {});
+          },
+          children: [
+            _secondPage(0),
+            _secondPage(1),
+          ],
+        ))
       ],
     );
   }
 }
 
-class _NavigationLine extends StatelessWidget {
+class _secondPage extends StatefulWidget {
+  final int pageType;
+
+  const _secondPage(this.pageType, {Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _secondPageState();
+  }
+
+}
+class _secondPageState extends State<_secondPage> with SingleTickerProviderStateMixin {
+  TabController _tabController;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _tabController = TabController(length: 10, vsync: this);
+  }
   @override
   Widget build(BuildContext context) {
+    // TODO: implement build
+    return Column(
+      children: [
+        Container(
+          height: 50,
+          child: TabBar(
+            isScrollable: true,
+            indicatorColor: Theme.of(context).primaryColor,
+            indicatorSize: TabBarIndicatorSize.label,
+            controller: _tabController,
+            tabs: List.filled(10, 0).map((e) => Text('标题', softWrap: false, style: Theme.of(context).textTheme.subtitle1,)).toList(),
+          ),
+        ),
+        Expanded(child: TabBarView(
+          controller: _tabController,
+          children: List.filled(10, null).map((e) => SectionPlaylist(limit: 16,)).toList(),
+        ))
+      ],
+    );
+  }
+
+}
+class _NavigationLine extends StatelessWidget {
+  final PageController pageCtrl;
+  final int activeIndex;
+
+
+  const _NavigationLine({Key key, this.pageCtrl, this.activeIndex}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    int active = activeIndex;
     return Container(
       margin: EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          _ItemNavigator(Icons.radio, "私人电台", () {
-            if (context.player.queue.isPlayingFm) {
-              context.secondaryNavigator.pushNamed(pageFmPlaying);
-              return;
-            }
-            showLoaderOverlay(context, neteaseRepository.getPersonalFmMusics()).then((musics) {
-              context.player.playFm(musics);
-              context.secondaryNavigator.pushNamed(pageFmPlaying);
-            }).catchError((error, stacktrace) {
-              debugPrint("error to play personal fm : $error $stacktrace");
-              toast('无法获取私人电台数据');
-            });
-          }),
-          _ItemNavigator(Icons.today, "每日推荐", () {
-            context.secondaryNavigator.pushNamed(pageDaily);
-          }),
-          _ItemNavigator(Icons.show_chart, "排行榜", () {
-            context.secondaryNavigator.pushNamed(pageLeaderboard);
-          }),
-        ],
+      child: StatefulBuilder(
+        builder: (context, stateSetter) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              _ItemNavigator(Icons.today, "所有专辑", () {
+                active = 0;
+                stateSetter(() {});
+                pageCtrl.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                // context.secondaryNavigator.pushNamed(pageDaily);
+              }, active: active == 0),
+              _ItemNavigator(Icons.show_chart, "所有选集", () {
+                active = 1;
+                stateSetter(() {});
+                pageCtrl.animateToPage(1, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                // context.secondaryNavigator.pushNamed(pageLeaderboard);
+              }, active: active == 1),
+            ],
+          );
+        },
       ),
     );
   }
-}
-
-///common header for section
-class _Header extends StatelessWidget {
-  final String text;
-  final GestureTapCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: 10, bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(padding: EdgeInsets.only(left: 20)),
-          Text(
-            text,
-            style: Theme.of(context).textTheme.subtitle1.copyWith(fontWeight: FontWeight.w600),
-          ),
-          Icon(Icons.chevron_right),
-        ],
-      ),
-    );
-  }
-
-  _Header(this.text, this.onTap);
 }
 
 class _ItemNavigator extends StatelessWidget {
   final IconData icon;
 
   final String text;
+  final bool active;
 
   final GestureTapCallback onTap;
 
@@ -121,13 +172,13 @@ class _ItemNavigator extends StatelessWidget {
                 ),
               ),
               Padding(padding: EdgeInsets.only(top: 8)),
-              Text(text),
+              Text(text, style: TextStyle(color: active ? Theme.of(context).primaryColor : Colors.black),),
             ],
           ),
         ));
   }
 
-  _ItemNavigator(this.icon, this.text, this.onTap);
+  _ItemNavigator(this.icon, this.text, this.onTap, {this.active});
 }
 
 class SectionPlaylist extends StatelessWidget {

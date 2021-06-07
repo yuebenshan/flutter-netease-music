@@ -5,6 +5,7 @@ import 'package:quiet/component.dart';
 import 'package:quiet/component/global/orientation.dart';
 import 'package:quiet/pages/account/page_user_detail.dart';
 import 'package:quiet/pages/main/main_page_discover.dart';
+import 'package:quiet/pages/main/main_page_history.dart';
 import 'package:quiet/pages/search/page_search.dart';
 import 'package:quiet/part/part.dart';
 import 'package:url_launcher/url_launcher.dart';

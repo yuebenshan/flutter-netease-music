@@ -5,6 +5,9 @@ import 'package:quiet/part/part.dart';
 
 /// A seek bar for current position.
 class DurationProgressBar extends StatefulWidget {
+  final bool light;
+
+  const DurationProgressBar({Key key, this.light = false}) : super(key: key);
   @override
   State<StatefulWidget> createState() => DurationProgressBarState();
 }
@@ -20,7 +23,7 @@ class DurationProgressBarState extends State<DurationProgressBar> {
   }
 
   Widget _buildBar(BuildContext context) {
-    var theme = Theme.of(context).primaryTextTheme;
+    var theme = widget.light ? Theme.of(context).textTheme : Theme.of(context).primaryTextTheme;
     var state = context.playbackState;
 
     Widget progressIndicator;

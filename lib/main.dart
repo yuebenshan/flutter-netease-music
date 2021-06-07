@@ -7,6 +7,7 @@ import 'package:music_player/music_player.dart';
 import 'package:netease_music_api/netease_cloud_music.dart' as api;
 import 'package:overlay_support/overlay_support.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quiet/Utils.dart';
 import 'package:quiet/component.dart';
 import 'package:quiet/component/route.dart';
 import 'package:quiet/material/app.dart';
@@ -20,7 +21,6 @@ import 'component/global/settings.dart';
 import 'component/netease/netease.dart';
 import 'component/player/interceptors.dart';
 import 'component/player/player.dart';
-
 void main() {
   debugDefaultTargetPlatformOverride = TargetPlatform.android;
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +35,7 @@ void main() {
       UserAccount.getPersistenceUser(),
       getApplicationDocumentsDirectory().then((dir) {
         Hive.init(dir.path);
+        dirPath = dir.path;
         return Hive.openBox<Map>("player");
       }),
     ],

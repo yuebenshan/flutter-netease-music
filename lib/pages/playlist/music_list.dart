@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:music_player/music_player.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:quiet/Utils.dart';
 import 'package:quiet/component/route.dart';
+import 'package:quiet/material/IconDownLoad.dart';
 import 'package:quiet/model/model.dart';
 import 'package:quiet/pages/artists/page_artist_detail.dart';
 import 'package:quiet/pages/comments/page_comment.dart';
@@ -12,19 +15,22 @@ import 'dialog_selector.dart';
 
 class MusicTileConfiguration extends StatelessWidget {
   static MusicTileConfiguration of(BuildContext context) {
-    final list = context.findAncestorWidgetOfExactType<MusicTileConfiguration>();
+    final list =
+        context.findAncestorWidgetOfExactType<MusicTileConfiguration>();
     assert(list != null, 'you can only use [MusicTile] inside MusicList scope');
     return list;
   }
 
-  static final Widget Function(BuildContext context, Music music) defaultTrailingBuilder = (context, music) {
+  static final Widget Function(BuildContext context, Music music)
+      defaultTrailingBuilder = (context, music) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[IconMV(music), _IconMore(music)],
+      children: <Widget>[IconMV(music), _IconMore(music), IconDownLoad(music)],
     );
   };
 
-  static final Widget Function(BuildContext context, Music music) indexedLeadingBuilder = (context, music) {
+  static final Widget Function(BuildContext context, Music music)
+      indexedLeadingBuilder = (context, music) {
     int index = MusicTileConfiguration.of(context).musics.indexOf(music) + 1;
     return _buildPlayingLeading(context, music) ??
         Container(
@@ -40,7 +46,8 @@ class MusicTileConfiguration extends StatelessWidget {
         );
   };
 
-  static final Widget Function(BuildContext context, Music music) coverLeadingBuilder = (context, music) {
+  static final Widget Function(BuildContext context, Music music)
+      coverLeadingBuilder = (context, music) {
     return _buildPlayingLeading(context, music) ??
         Container(
           margin: const EdgeInsets.only(left: 8, right: 8),
@@ -59,29 +66,39 @@ class MusicTileConfiguration extends StatelessWidget {
 
   //return null if current music is not be playing
   static Widget _buildPlayingLeading(BuildContext context, Music music) {
-    if (MusicTileConfiguration.of(context).token == context.playList.queueId && music == context.playerValue.current) {
+    if (MusicTileConfiguration.of(context).token == context.playList.queueId &&
+        music == context.playerValue.current) {
       return Container(
         margin: const EdgeInsets.only(left: 8, right: 8),
         width: 40,
         height: 40,
         child: Center(
-          child: Icon(Icons.volume_up, color: Theme.of(context).primaryColorLight),
+          child:
+              Icon(Icons.volume_up, color: Theme.of(context).primaryColorLight),
         ),
       );
     }
     return null;
   }
 
-  static final void Function(BuildContext context, Music muisc) defaultOnTap = (context, music) {
+  static final void Function(BuildContext context, Music muisc) defaultOnTap =
+      (context, music) {
     final list = MusicTileConfiguration.of(context);
     final player = context.player;
     final PlayQueue playList = player.value.queue;
-    if (playList.queueId == list.token && player.playbackState.isPlaying && player.metadata == music.metadata) {
+
+    if (playList.queueId == list.token &&
+        player.playbackState.isPlaying &&
+        player.metadata == music.metadata) {
       //open playing page
       Navigator.pushNamed(context, pagePlaying);
     } else {
-      context.player.playWithQueue(PlayQueue(queue: list.queue, queueId: list.token, queueTitle: list.token),
+      context.player.playWithQueue(
+          PlayQueue(
+              queue: list.queue, queueId: list.token, queueTitle: list.token),
           metadata: music.metadata);
+
+      print("播放了");
     }
   };
 
@@ -89,7 +106,7 @@ class MusicTileConfiguration extends StatelessWidget {
 
   final List<Music> musics;
 
-  final List<MusicMetadata> queue;
+  List<MusicMetadata> queue;
 
   final void Function(BuildContext context, Music muisc) onMusicTap;
 
@@ -207,18 +224,23 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(noHeader ? 0 : 16)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(noHeader ? 0 : 16)),
       child: Material(
         color: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         child: InkWell(
           onTap: () {
             final list = MusicTileConfiguration.of(context);
-            if (context.player.queue.queueId == list.token && context.player.playbackState.isPlaying) {
+            if (context.player.queue.queueId == list.token &&
+                context.player.playbackState.isPlaying) {
               //open playing page
               Navigator.pushNamed(context, pagePlaying);
             } else {
-              context.player.playWithQueue(PlayQueue(queue: list.queue, queueId: list.token, queueTitle: list.token));
+              context.player.playWithQueue(PlayQueue(
+                  queue: list.queue,
+                  queueId: list.token,
+                  queueTitle: list.token));
             }
           },
           child: SizedBox.fromSize(
@@ -273,7 +295,8 @@ class IconMV extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => MusicVideoPlayerPage(music.mvId)),
+            MaterialPageRoute(
+                builder: (context) => MusicVideoPlayerPage(music.mvId)),
           );
         });
   }
@@ -316,7 +339,8 @@ class _IconMore extends StatelessWidget {
     ];
 
     items.add(PopupMenuItem(
-        child: Text("歌手: ${music.artist.map((a) => a.name).join('/')}", maxLines: 1),
+        child: Text("作者: ${music.artist.map((a) => a.name).join('/')}",
+            maxLines: 1),
         //如果所有artist的id为0，那么disable这个item
         enabled: music.artist.fold(0, (c, ar) => c + ar.id) != 0,
         value: _MusicAction.artists));
@@ -344,7 +368,8 @@ class _IconMore extends StatelessWidget {
       case _MusicAction.comment:
         Navigator.push(context, MaterialPageRoute(builder: (context) {
           return CommentPage(
-            threadId: CommentThreadId(music.id, CommentType.song, payload: CommentThreadPayload.music(music)),
+            threadId: CommentThreadId(music.id, CommentType.song,
+                payload: CommentThreadPayload.music(music)),
           );
         }));
         break;
@@ -358,7 +383,8 @@ class _IconMore extends StatelessWidget {
               return PlaylistSelectorDialog();
             });
         if (id != null) {
-          bool succeed = await neteaseRepository.playlistTracksEdit(PlaylistOperation.add, id, [music.id]);
+          bool succeed = await neteaseRepository
+              .playlistTracksEdit(PlaylistOperation.add, id, [music.id]);
           var scaffold = Scaffold.of(context);
           if (scaffold == null) {
             //not notify when scaffold is empty
@@ -368,7 +394,8 @@ class _IconMore extends StatelessWidget {
             showSimpleNotification(Text("已添加到收藏"));
           } else {
             showSimpleNotification(Text("收藏歌曲失败!"),
-                leading: Icon(Icons.error), background: Theme.of(context).errorColor);
+                leading: Icon(Icons.error),
+                background: Theme.of(context).errorColor);
           }
         }
         break;

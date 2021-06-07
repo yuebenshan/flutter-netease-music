@@ -1,5 +1,9 @@
-import 'package:music_player/music_player.dart';
+import 'dart:io';
 
+import 'package:music_player/music_player.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../Utils.dart';
 import 'model.dart';
 
 class Music {
@@ -30,7 +34,9 @@ class Music {
   MusicMetadata _metadata;
 
   MusicMetadata get metadata {
-    if (_metadata != null) return _metadata;
+    if (_metadata != null) {
+      return _metadata;
+    }
     _metadata = MusicMetadata(
       mediaId: id.toString(),
       title: title,

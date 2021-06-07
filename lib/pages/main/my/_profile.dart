@@ -17,15 +17,16 @@ class UserProfileSection extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 16, right: 16),
-      child: InkWell(
-        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      child: GestureDetector(
+      // child: InkWell(
+      //   customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => UserDetailPage(userId: UserAccount.of(context).userId),
-            ),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => UserDetailPage(userId: UserAccount.of(context).userId),
+          //   ),
+          // );
         },
         child: Container(
           height: 72,
@@ -77,7 +78,19 @@ class UserProfileSection extends StatelessWidget {
                     Navigator.of(context).pushNamed(pageLogin);
                   }
                 },
-                child: Icon(Icons.play_circle_outline),
+                child: Container(
+                  padding: EdgeInsets.only(left: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).primaryColor),
+                    borderRadius: BorderRadius.circular(30)
+                  ),
+                  child: Row(
+                    children: [
+                      Text('最近播放', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12),),
+                      Icon(Icons.play_arrow_rounded, color: Theme.of(context).primaryColor,)
+                    ],
+                  ),
+                ),
               )
             ],
           ),

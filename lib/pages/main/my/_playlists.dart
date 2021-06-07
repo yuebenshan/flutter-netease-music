@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:logging/logging.dart';
+import 'package:quiet/Utils.dart';
 import 'package:quiet/component.dart';
 import 'package:quiet/model/playlist_detail.dart';
 import 'package:quiet/pages/playlist/music_list.dart';
@@ -245,6 +248,7 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
     if (details.isEmpty) {
       return const [];
     }
+
     final list = details.toList(growable: false);
     final List<Widget> widgets = <Widget>[];
     if(item??false) {
@@ -253,9 +257,22 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
         margin: EdgeInsets.only(left: 16, right: 16),
         padding: EdgeInsets.only(top: 10),
         child: FutureBuilder<PlaylistDetail>(
-            future: neteaseLocalData.getPlaylistDetail(details.first.id),
+            future: playlistDetail(details.first.id),
             builder: (context, result) {
-              return result?.data == null ? Container() : PlaylistBody(result?.data, noHeader: true, count: result?.data?.musicList?.length);
+              PlaylistDetail detail;
+              // if(result.hasData) {
+              //   Map map = result?.data?.toMap();
+              //   map['musicList'] = map['musicList'].map((music) {
+              //     String randid = 'downLoadMusic_${music['id']}';
+              //     if (File(dirloc + randid.toString() + ".mp3").existsSync()) {
+              //       String url = dirloc + randid.toString() + ".mp3";
+              //       music['url'] = 'url';
+              //     }
+              //     return music;
+              //   }).toList();
+              //   detail = PlaylistDetail.fromMap(map);
+              // }
+              return result?.data == null ? Container() : PlaylistBody(result?.data, noHeader: true, count: detail?.musicList?.length);
             }),
       ));
     } else {
@@ -271,5 +288,9 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
     return SliverList(
       delegate: SliverChildListDelegate([child]),
     );
+  }
+
+  static Future<PlaylistDetail> playlistDetail(id) async {
+    return (await neteaseRepository.playlistDetail(id)).asFuture;
   }
 }

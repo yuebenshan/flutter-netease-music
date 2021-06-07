@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:music_player/music_player.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:quiet/Utils.dart';
 import 'package:quiet/repository/netease.dart';
 import 'package:quiet/model/model.dart';
 
@@ -12,12 +15,25 @@ import 'player.dart';
 class BackgroundInterceptors {
   // 获取播放地址
   static Future<String> playUriInterceptor(String mediaId, String fallbackUri) async {
+    /// some devices do not support http request.
+    String dirloc;
+    if (Platform.isAndroid) {
+      dirloc = "/sdcard/download/";
+    } else {
+      dirloc = (await getApplicationDocumentsDirectory()).path + '/';
+    }
+    String randid = 'downLoadMusic/_$mediaId';
+    String localUrl;
+    if (File(dirloc + randid.toString() + ".mp3").existsSync()) {
+      localUrl = dirloc + randid.toString() + ".mp3";
+      return 'file://$localUrl';
+    }
+
     final result = await neteaseRepository.getPlayUrl(int.parse(mediaId));
     if (result.isError) {
       return fallbackUri;
     }
 
-    /// some devices do not support http request.
     return result.asValue.value.replaceFirst("http://", "https://");
   }
 

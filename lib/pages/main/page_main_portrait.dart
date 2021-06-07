@@ -33,7 +33,7 @@ class _MainPageState extends State<_PortraitMainPage> with SingleTickerProviderS
         textTheme: Theme.of(context).textTheme,
         iconTheme: Theme.of(context).iconTheme,
         leading: IconButton(
-            icon: Icon(Icons.menu),
+            icon: Icon(Icons.logout),
             onPressed: () async {
               // _scaffoldKey.currentState.openDrawer();
               // if(UserAccount.of(context).isLogin) {
@@ -74,7 +74,7 @@ class _MainPageState extends State<_PortraitMainPage> with SingleTickerProviderS
       ),
       body: BoxWithBottomPlayerController(TabBarView(
         controller: _tabController,
-        children: <Widget>[MainPageMy(), MainPageDiscover(), MainPageDiscover()],
+        children: <Widget>[MainPageMy(), MainPageDiscover(), MainPageHistory()],
       )),
     );
   }

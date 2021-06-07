@@ -11,7 +11,7 @@ version: 1.0.0+1
 publish_to: none
 
 environment:
-  sdk: ">=2.9.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -37,14 +37,20 @@ dependencies:
       refs: tags/v0.1.0
   encrypt: ^3.0.0
   netease_music_api:
-    path: cloud_music_api/
+#    path: cloud_music_api/
+    git:
+      url: https://github.com/ziming1/NeteaseCloudMusicApi.git
   overlay_support: ^1.2.1
   music_player:
-    path: music_service/
+#    path: music_service/
+    git:
+      url: https://github.com/boyan01/flutter-music-player.git
   provider: ^4.0.1
   scrollable_positioned_list: ^0.1.7
   hive: ^1.4.4
-
+  permission_handler:
+  file_utils: ^1.0.0
+  html2md:
 dependency_overrides:
   intl: ^0.17.0-nullsafety.2
 

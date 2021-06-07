@@ -81,7 +81,7 @@ extension MusicPlayerExt on MusicPlayer {
   /// 播放私人 FM
   /// [musics] 初始化数据
   void playFm(List<Music> musics) {
-    final queue = PlayQueue(queueTitle: "私人FM", queueId: FM_PLAY_QUEUE_ID, queue: musics.toMetadataList());
+    final queue = PlayQueue(queueTitle: "私人电台", queueId: FM_PLAY_QUEUE_ID, queue: musics.toMetadataList());
     playWithQueue(queue);
   }
 }

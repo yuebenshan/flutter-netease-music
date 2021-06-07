@@ -31,7 +31,7 @@ class PagePlayingFm extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 AppBar(
-                  title: Text("私人FM"),
+                  title: Text("私人电台"),
                   elevation: 0,
                   backgroundColor: Colors.transparent,
                 ),

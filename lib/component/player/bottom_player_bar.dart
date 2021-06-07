@@ -49,10 +49,11 @@ class BoxWithBottomPlayerController extends StatelessWidget {
 ///底部当前音乐播放控制栏
 class BottomControllerBar extends StatelessWidget {
   final double bottomPadding;
+  final bool noRoute;
 
   const BottomControllerBar({
     Key key,
-    this.bottomPadding = 0,
+    this.bottomPadding = 0, this.noRoute = false,
   })  : assert(bottomPadding != null),
         super(key: key);
 
@@ -65,7 +66,7 @@ class BottomControllerBar extends StatelessWidget {
     }
     return InkWell(
       onTap: () {
-        if (music != null) {
+        if (music != null && !noRoute) {
           context.rootNavigator.pushNamed(queue.isPlayingFm ? pageFmPlaying : pagePlaying);
         }
       },
