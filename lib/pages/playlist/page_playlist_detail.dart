@@ -129,7 +129,7 @@ class _PlaylistBodyState extends State<PlaylistBody> {
               toast(result ? '删除成功' : '删除失败');
             },
       onMusicTap: MusicTileConfiguration.defaultOnTap,
-      leadingBuilder: MusicTileConfiguration.indexedLeadingBuilder,
+      leadingBuilder: MusicTileConfiguration.coverLeadingBuilder,
       trailingBuilder: MusicTileConfiguration.defaultTrailingBuilder,
       child: CustomScrollView(
         shrinkWrap: true,

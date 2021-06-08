@@ -35,7 +35,9 @@ class _AlbumDetailPageState extends State<AlbumDetailPage> {
           builder: (context, result) {
             return _AlbumBody(
               album: result["album"],
-              musicList: mapJsonListToMusicList(result["songs"], artistKey: "ar", albumKey: "al") ?? [],
+              musicList: mapJsonListToMusicList(result["songs"],
+                      artistKey: "ar", albumKey: "al") ??
+                  [],
             );
           }),
     );
@@ -57,7 +59,7 @@ class _AlbumBody extends StatelessWidget {
         token: 'album_${album['id']}',
         musics: musicList,
         onMusicTap: MusicTileConfiguration.defaultOnTap,
-        leadingBuilder: MusicTileConfiguration.indexedLeadingBuilder,
+        leadingBuilder: MusicTileConfiguration.coverLeadingBuilder,
         trailingBuilder: MusicTileConfiguration.defaultTrailingBuilder,
         child: BoxWithBottomPlayerController(CustomScrollView(slivers: [
           SliverAppBar(
@@ -70,7 +72,8 @@ class _AlbumBody extends StatelessWidget {
             bottom: MusicListHeader(musicList.length),
           ),
           SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) => MusicTile(musicList[index]),
+              delegate: SliverChildBuilderDelegate(
+                  (context, index) => MusicTile(musicList[index]),
                   childCount: musicList.length)),
         ])));
   }
@@ -92,6 +95,7 @@ class _AlbumDetailHeader extends StatelessWidget {
         content: _buildContent(context),
         builder: (context, t) => AppBar(
               automaticallyImplyLeading: false,
+              leading: BackButton(),
               title: Text(t > 0.5 ? album["name"] : '专辑'),
               titleSpacing: 16,
               elevation: 0,
@@ -107,7 +111,8 @@ class _AlbumDetailHeader extends StatelessWidget {
   Widget _buildContent(BuildContext context) {
     final artist = (album["artists"] as List)
         .cast<Map>()
-        .map((m) => Artist(name: m["name"], id: m["id"], imageUrl: m["img1v1Url"]))
+        .map((m) =>
+            Artist(name: m["name"], id: m["id"], imageUrl: m["img1v1Url"]))
         .toList(growable: false);
 
     return DetailHeader(
@@ -115,7 +120,8 @@ class _AlbumDetailHeader extends StatelessWidget {
         commentCount: album["info"]["commentCount"],
         onCommentTap: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return CommentPage(threadId: CommentThreadId(album["id"], CommentType.album));
+            return CommentPage(
+                threadId: CommentThreadId(album["id"], CommentType.album));
           }));
         },
         onSelectionTap: () {
@@ -124,11 +130,14 @@ class _AlbumDetailHeader extends StatelessWidget {
           }));
         },
         onShareTap: () {
-          final content = MessageFormat(context.strings["album_share_content"]).format({
+          final content =
+              MessageFormat(context.strings["album_share_content"]).format({
             "artistName": artist.map((e) => e.name).join(','),
             "albumName": album["name"],
             "albumId": album["id"].toString(),
-            "sharedUserId": UserAccount.of(context, rebuildOnChange: false).userId.toString(),
+            "sharedUserId": UserAccount.of(context, rebuildOnChange: false)
+                .userId
+                .toString(),
           });
           Clipboard.setData(ClipboardData(text: content));
           toast(context.strings["share_content_copied"]);
@@ -145,7 +154,8 @@ class _AlbumDetailHeader extends StatelessWidget {
                   aspectRatio: 1,
                   child: ClipRRect(
                     borderRadius: BorderRadius.all(Radius.circular(3)),
-                    child: Image(fit: BoxFit.cover, image: CachedImage(album["picUrl"])),
+                    child: Image(
+                        fit: BoxFit.cover, image: CachedImage(album["picUrl"])),
                   ),
                 ),
               ),
@@ -164,7 +174,8 @@ class _AlbumDetailHeader extends StatelessWidget {
                     InkWell(
                         child: Padding(
                           padding: const EdgeInsets.only(top: 4, bottom: 4),
-                          child: Text("歌手: ${artist.map((a) => a.name).join('/')}"),
+                          child: Text(
+                              "歌手: ${artist.map((a) => a.name).join('/')}"),
                         ),
                         onTap: () {
                           launchArtistDetailPage(context, artist);

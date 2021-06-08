@@ -105,7 +105,7 @@ void main() {
     await tester.pumpWidget(TestContext(child: Provider.value(value: account, child: DailyPlaylistPage())));
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('每日推荐'), findsWidgets);
+    expect(find.text('文章列表'), findsWidgets);
     expect(find.byType(MusicTile), findsWidgets);
     expect(find.text('倒数'), findsOneWidget);
     expect(find.text('像我这样的人'), findsOneWidget);

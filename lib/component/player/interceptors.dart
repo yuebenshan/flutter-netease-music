@@ -13,19 +13,25 @@ import 'package:quiet/model/model.dart';
 import 'player.dart';
 
 class BackgroundInterceptors {
+  static String dirloc;
+  static Future<String> getLocalFile(mediaId) async {
+    if(dirloc == null) {
+      if (Platform.isAndroid) {
+        dirloc = "/sdcard/download/";
+      } else {
+        dirloc = (await getApplicationDocumentsDirectory()).path + '/';
+      }
+    }
+    String randid = 'downLoadMusic/_$mediaId';
+    String localUrl = dirloc + randid.toString() + ".mp3";
+    return Future.value(localUrl);
+  }
+
   // 获取播放地址
   static Future<String> playUriInterceptor(String mediaId, String fallbackUri) async {
     /// some devices do not support http request.
-    String dirloc;
-    if (Platform.isAndroid) {
-      dirloc = "/sdcard/download/";
-    } else {
-      dirloc = (await getApplicationDocumentsDirectory()).path + '/';
-    }
-    String randid = 'downLoadMusic/_$mediaId';
-    String localUrl;
-    if (File(dirloc + randid.toString() + ".mp3").existsSync()) {
-      localUrl = dirloc + randid.toString() + ".mp3";
+    String localUrl = await getLocalFile(mediaId);
+    if (File(localUrl).existsSync()) {
       return 'file://$localUrl';
     }
 

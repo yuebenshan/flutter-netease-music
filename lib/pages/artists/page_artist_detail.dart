@@ -134,7 +134,7 @@ class _PageHotSongsState extends State<_PageHotSongs> with AutomaticKeepAliveCli
     return MusicTileConfiguration(
       musics: widget.musicList,
       token: 'artist_${widget.artistId}_hot',
-      leadingBuilder: MusicTileConfiguration.indexedLeadingBuilder,
+      leadingBuilder: MusicTileConfiguration.coverLeadingBuilder,
       trailingBuilder: MusicTileConfiguration.defaultTrailingBuilder,
       onMusicTap: MusicTileConfiguration.defaultOnTap,
       child: ListView.builder(

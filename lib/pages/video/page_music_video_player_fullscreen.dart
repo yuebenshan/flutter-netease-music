@@ -34,7 +34,7 @@ class FullScreenMvPlayerState extends State<FullScreenMvPlayer> {
         children: <Widget>[
           Center(
             child: AspectRatio(
-                aspectRatio: value.initialized ? value.aspectRatio : 1,
+                aspectRatio: value.isInitialized ? value.aspectRatio : 1,
                 child: VideoPlayer(VideoPlayerModel.of(context).videoPlayerController)),
           ),
           _FullScreenController(),
@@ -116,7 +116,7 @@ class _FullScreenController extends StatelessWidget {
               child: Slider(
                   value: position.clamp(0, duration).toDouble(),
                   max: duration.toDouble(),
-                  onChanged: value.initialized
+                  onChanged: value.isInitialized
                       ? (v) {
                           VideoPlayerModel.of(context).videoPlayerController
                             ..seekTo(Duration(milliseconds: v.toInt()))

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:quiet/model/playlist_detail.dart';
+import 'package:quiet/pages/main/playlist_tile.dart';
 import 'package:quiet/pages/playlist/music_list.dart';
 import 'package:quiet/pages/playlist/page_playlist_detail.dart';
 import 'package:quiet/part/part.dart';
@@ -36,24 +38,14 @@ class CloudPageState extends State<MainPageHistory> with AutomaticKeepAliveClien
     super.build(context);
     return Column(
       children: <Widget>[
-        StatefulBuilder(builder: (context, navigationLineState) {
-          _navigationLineState = navigationLineState;
-          return _NavigationLine(
-              pageCtrl: _pageController,
-              activeIndex: activeIndex
-          );
-        }),
-        Expanded(child: PageView(
-          controller: _pageController,
-          onPageChanged: (index) {
-            activeIndex = index;
-            _navigationLineState(() {});
-          },
-          children: [
-            _secondPage(0),
-            _secondPage(1),
-          ],
-        ))
+        // StatefulBuilder(builder: (context, navigationLineState) {
+        //   _navigationLineState = navigationLineState;
+        //   return _NavigationLine(
+        //       pageCtrl: _pageController,
+        //       activeIndex: activeIndex
+        //   );
+        // }),
+        Expanded(child: _secondPage(0))
       ],
     );
   }
@@ -191,23 +183,46 @@ class SectionPlaylist extends StatelessWidget {
       loadTask: () => neteaseRepository.personalizedPlaylist(limit: limit),
       builder: (context, result) {
         List<Map> list = (result["result"] as List).cast();
-        return LayoutBuilder(builder: (context, constraints) {
-          assert(constraints.maxWidth.isFinite, "can not layout playlist item in infinite width container.");
-          final parentWidth = constraints.maxWidth - 32;
-          int count = /* false ? 6 : */ 3;
-          double width = (parentWidth ~/ count).toDouble().clamp(80.0, 200.0);
-          double spacing = (parentWidth - width * count) / (count + 1);
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16 + spacing.roundToDouble()),
-            child: Wrap(
-              spacing: spacing,
-              direction: Axis.horizontal,
-              children: list.map<Widget>((p) {
-                return _PlayListItemView(playlist: p, width: width);
-              }).toList(),
-            ),
-          );
-        });
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.only(top: 20),
+          itemBuilder: (context, index) {
+            return PlaylistTile(playlist: PlaylistDetail.fromJson({
+              'id': list[index]['id'],
+              'musicList': [],
+              'creator': null,
+              'name': list[index]['name']??"伴儿",
+              'coverUrl': list[index]['picUrl'],
+              'trackCount': 0,
+              'description': list[index]['copywriter']??"介绍",
+              'subscribed': false,
+              'subscribedCount': 1,
+              'commentCount': 1,
+              'shareCount': 1,
+              'playCount': 2
+            }));
+          },
+          itemCount: list.length,
+        );
+        // return LayoutBuilder(builder: (context, constraints) {
+        //   assert(constraints.maxWidth.isFinite, "can not layout playlist item in infinite width container.");
+        //   final parentWidth = constraints.maxWidth - 32;
+        //   int count = /* false ? 6 : */ 3;
+        //   double width = (parentWidth ~/ count).toDouble().clamp(80.0, 200.0);
+        //   double spacing = (parentWidth - width * count) / (count + 1);
+        //   return Padding(
+        //     padding: EdgeInsets.symmetric(horizontal: 16 + spacing.roundToDouble()),
+        //     child: Wrap(
+        //       spacing: spacing,
+        //       direction: Axis.horizontal,
+        //       children: list.map<Widget>((p) {
+        //         return _PlayListItemView(playlist: p, width: width);
+        //       }).toList(),
+        //     ),
+        //   );
+        // }
+        // );
       },
     );
   }
@@ -302,7 +317,7 @@ class SectionNewSongs extends StatelessWidget {
           musics: songs,
           token: 'playlist_main_newsong',
           onMusicTap: MusicTileConfiguration.defaultOnTap,
-          leadingBuilder: MusicTileConfiguration.indexedLeadingBuilder,
+          leadingBuilder: MusicTileConfiguration.coverLeadingBuilder,
           trailingBuilder: MusicTileConfiguration.defaultTrailingBuilder,
           child: Column(
             children: songs.map((m) => MusicTile(m)).toList(),

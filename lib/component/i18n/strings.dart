@@ -39,7 +39,6 @@ class QuietLocalizations {
       "playlist_login_description": "Login to discover your playlists.",
       "favorite_article_list": "收藏文章",
       "favorite_album_list": "收藏专辑",
-      "favorite_anthology_list": "收藏选集",
       "playlist_share_content": "The PlayList created by {username}「{title}」: "
           "http://music.163.com/playlist/{playlistId}/{userId}/?userid={shareUserId} (From @NeteaseCouldMusic)",
       "share_content_copied": "Share content has copied to clipboard.",
@@ -62,7 +61,6 @@ class QuietLocalizations {
       "playlist_login_description": "登录以加载你的私人播放列表。",
       "favorite_article_list": "收藏文章",
       "favorite_album_list": "收藏专辑",
-      "favorite_anthology_list": "收藏选集",
       "playlist_share_content": "分享{username}创建的歌单「{title}」: "
           "http://music.163.com/playlist/{playlistId}/{userId}/?userid={shareUserId} (来自@网易云音乐)",
       "share_content_copied": "分享内容已复制到剪切板",

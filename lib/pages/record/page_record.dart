@@ -19,7 +19,7 @@ class RecordPage extends StatelessWidget {
         length: 2,
         child: new Scaffold(
           appBar: AppBar(
-            title: Text(username == null ? '听歌排行' : '$username的听歌排行'),
+            title: Text(username == null ? '最近播放' : '$username的最近播放'),
             bottom: TabBar(
               tabs: [Tab(text: '最近一周'), Tab(text: '所有时间')],
               indicator: PrimaryTabIndicator(),
@@ -108,7 +108,7 @@ class _RecordMusicList extends StatelessWidget {
     return MusicTileConfiguration(
       musics: musicList,
       token: 'play_record_$type',
-      leadingBuilder: MusicTileConfiguration.indexedLeadingBuilder,
+      leadingBuilder: MusicTileConfiguration.coverLeadingBuilder,
       onMusicTap: MusicTileConfiguration.defaultOnTap,
       trailingBuilder: (context, music) {
         return Container(

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:logging/logging.dart';
+import 'package:music_player/music_player.dart';
 import 'package:quiet/Utils.dart';
 import 'package:quiet/component.dart';
 import 'package:quiet/model/playlist_detail.dart';
@@ -12,13 +13,14 @@ import 'package:quiet/repository/netease.dart';
 
 import '../playlist_tile.dart';
 
-enum PlayListType { article, album, anthology }
+enum PlayListType { article, album }
 
 class PlayListsGroupHeader extends StatelessWidget {
   final String name;
   final int count;
 
-  const PlayListsGroupHeader({Key key, @required this.name, this.count}) : super(key: key);
+  const PlayListsGroupHeader({Key key, @required this.name, this.count})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +57,11 @@ class MainPlayListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 5),
       child: Material(
-        borderRadius: enableBottomRadius ? const BorderRadius.vertical(bottom: Radius.circular(4)) : null,
+        borderRadius: enableBottomRadius
+            ? const BorderRadius.vertical(bottom: Radius.circular(4))
+            : null,
         color: Theme.of(context).backgroundColor,
         child: Container(
           child: PlaylistTile(playlist: data),
@@ -69,15 +73,14 @@ class MainPlayListTile extends StatelessWidget {
 
 const double _kPlayListHeaderHeight = 48;
 
-const double _kPlayListDividerHeight = 10;
-
 class MyPlayListsHeaderDelegate extends SliverPersistentHeaderDelegate {
   final TabController tabController;
 
   MyPlayListsHeaderDelegate(this.tabController);
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return _MyPlayListsHeader(controller: tabController);
   }
 
@@ -93,7 +96,8 @@ class MyPlayListsHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-class _MyPlayListsHeader extends StatelessWidget implements PreferredSizeWidget {
+class _MyPlayListsHeader extends StatelessWidget
+    implements PreferredSizeWidget {
   final TabController controller;
 
   const _MyPlayListsHeader({Key key, this.controller}) : super(key: key);
@@ -112,7 +116,7 @@ class _MyPlayListsHeader extends StatelessWidget implements PreferredSizeWidget 
         tabs: [
           Tab(text: context.strings["favorite_article_list"]),
           Tab(text: context.strings["favorite_album_list"]),
-          Tab(text: context.strings["favorite_anthology_list"]),
+          // Tab(text: context.strings["favorite_anthology_list"]),
         ],
       ),
     );
@@ -129,7 +133,8 @@ class PlayListSliverKey extends ValueKey {
   final int createdPosition;
   final int favoritePosition;
 
-  const PlayListSliverKey({this.createdPosition, this.favoritePosition}) : super("_PlayListSliverKey");
+  const PlayListSliverKey({this.createdPosition, this.favoritePosition})
+      : super("_PlayListSliverKey");
 }
 
 class UserPlayListSection extends StatefulWidget {
@@ -168,7 +173,6 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (!UserAccount.of(context).isLogin) {
@@ -183,14 +187,19 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
           return _singleSliver(child: Container());
         },
         errorBuilder: (context, result) {
-          return _singleSliver(child: Loader.buildSimpleFailedWidget(context, result));
+          return _singleSliver(
+              child: Loader.buildSimpleFailedWidget(context, result));
         },
         builder: (context, result) {
-          final created = result.where((p) => p.creator["userId"] == widget.userId).toList();
-          final subscribed = result.where((p) => p.creator["userId"] != widget.userId);
+          final created = result
+              .where((p) => p.creator["userId"] == widget.userId)
+              .toList();
+          final subscribed =
+              result.where((p) => p.creator["userId"] != widget.userId);
           _dividerIndex = 2 + created.length;
           return SliverList(
-            key: PlayListSliverKey(createdPosition: 1, favoritePosition: 3 + created.length),
+            key: PlayListSliverKey(
+                createdPosition: 1, favoritePosition: 3 + created.length),
             delegate: SliverChildListDelegate.fixed([
               Container(
                 height: MediaQuery.of(context).size.height - 270,
@@ -198,18 +207,32 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
                   physics: NeverScrollableScrollPhysics(),
                   controller: widget.pageController,
                   children: [
-                    ..._playlistWidget(created, item: true),
+                    Loader<Map>(
+                        loadTask: () => neteaseRepository.recommendSongs(),
+                        builder: (context, result) {
+                          List<Music> list = (result["recommend"] as List)
+                              .cast<Map>()
+                              .map(mapJsonToMusic)
+                              .toList();
+                          return StatefulBuilder(builder: (context, listState) {
+                            return MusicTileConfiguration(
+                                token: 'playlist_daily_recommend',
+                                musics: list,
+                                type: 'my',
+                                remove: (Music music) {
+                                  list = list.where((Music element) => element.id != music.id).toList();
+                                  listState(() {});
+                                },
+                                trailingBuilder:
+                                MusicTileConfiguration.defaultTrailingBuilder,
+                                leadingBuilder:
+                                MusicTileConfiguration.coverLeadingBuilder,
+                                onMusicTap: MusicTileConfiguration.defaultOnTap,
+                                child: MusicFavList());
+                          });
+                        }),
                     Container(
                       color: Colors.white,
-                      margin: EdgeInsets.symmetric(horizontal: 16),
-                      child: ListView(
-                        padding: EdgeInsets.only(top: 20),
-                        children: _playlistWidget(subscribed),
-                      ),
-                    ),
-                    Container(
-                      color: Colors.white,
-                      margin: EdgeInsets.symmetric(horizontal: 16),
                       child: ListView(
                         padding: EdgeInsets.only(top: 20),
                         children: _playlistWidget(subscribed),
@@ -239,48 +262,23 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
       ),
     );
   }
+
   static Iterable<Widget> _playlistItemWidget() {
     final List<Widget> widgets = <Widget>[];
     return widgets;
   }
 
-  static Iterable<Widget> _playlistWidget(Iterable<PlaylistDetail> details, {bool item}) {
+  static Iterable<Widget> _playlistWidget(Iterable<PlaylistDetail> details) {
     if (details.isEmpty) {
       return const [];
     }
 
     final list = details.toList(growable: false);
     final List<Widget> widgets = <Widget>[];
-    if(item??false) {
-      widgets.add(Container(
-        color: Colors.white,
-        margin: EdgeInsets.only(left: 16, right: 16),
-        padding: EdgeInsets.only(top: 10),
-        child: FutureBuilder<PlaylistDetail>(
-            future: playlistDetail(details.first.id),
-            builder: (context, result) {
-              PlaylistDetail detail;
-              // if(result.hasData) {
-              //   Map map = result?.data?.toMap();
-              //   map['musicList'] = map['musicList'].map((music) {
-              //     String randid = 'downLoadMusic_${music['id']}';
-              //     if (File(dirloc + randid.toString() + ".mp3").existsSync()) {
-              //       String url = dirloc + randid.toString() + ".mp3";
-              //       music['url'] = 'url';
-              //     }
-              //     return music;
-              //   }).toList();
-              //   detail = PlaylistDetail.fromMap(map);
-              // }
-              return result?.data == null ? Container() : PlaylistBody(result?.data, noHeader: true, count: detail?.musicList?.length);
-            }),
-      ));
-    } else {
-      for (int i = 0; i < list.length; i++) {
-        widgets.add(MainPlayListTile(data: list[i], enableBottomRadius: i == list.length - 1));
-      }
+    for (int i = 0; i < list.length; i++) {
+      widgets.add(MainPlayListTile(
+          data: list[i], enableBottomRadius: i == list.length - 1));
     }
-
     return widgets;
   }
 
@@ -292,5 +290,89 @@ class _UserPlayListSectionState extends State<UserPlayListSection> {
 
   static Future<PlaylistDetail> playlistDetail(id) async {
     return (await neteaseRepository.playlistDetail(id)).asFuture;
+  }
+}
+
+class MusicFavList extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(vertical: 20),
+      height: MediaQuery.of(context).size.height,
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(
+                top: Radius.circular(16)),
+            child: InkWell(
+              onTap: () {
+                final list =
+                MusicTileConfiguration.of(context);
+                if (context.player.queue.queueId ==
+                    list.token &&
+                    context.player.playbackState
+                        .isPlaying) {
+                  //open playing page
+                  Navigator.pushNamed(
+                      context, pagePlaying);
+                } else {
+                  context.player.playWithQueue(
+                      PlayQueue(
+                          queue: list.queue,
+                          queueId: list.token,
+                          queueTitle: list.token));
+                }
+              },
+              child: SizedBox.fromSize(
+                size: Size.fromHeight(50),
+                child: Row(
+                  children: <Widget>[
+                    Padding(
+                      padding:
+                      EdgeInsets.only(left: 20),
+                    ),
+                    Icon(
+                      Icons.play_circle_outline,
+                      color: Theme.of(context)
+                          .iconTheme
+                          .color,
+                    ),
+                    Padding(
+                        padding:
+                        EdgeInsets.only(left: 4)),
+                    Text(
+                      "播放全部",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyText2,
+                    ),
+                    Padding(
+                        padding:
+                        EdgeInsets.only(left: 2)),
+                    Text(
+                      "(共${MusicTileConfiguration.of(context).musics.length}首)",
+                      style: Theme.of(context)
+                          .textTheme
+                          .caption,
+                    ),
+                    Spacer(),
+                  ]..removeWhere((v) => v == null),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return MusicTile(MusicTileConfiguration.of(context).musics[index]);
+                },
+                itemCount: MusicTileConfiguration.of(context).musics.length,
+              ))
+        ],
+      ),
+    );
   }
 }

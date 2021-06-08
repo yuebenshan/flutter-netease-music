@@ -109,7 +109,7 @@ class _AnimatedMvControllerState extends State<AnimatedMvController>
         onDoubleTap: () {
           final controller = VideoPlayerModel.of(context).videoPlayerController;
           final value = controller.value;
-          if (value.initialized) {
+          if (value.isInitialized) {
             if (value.isPlaying) {
               controller.pause();
             } else {
@@ -156,7 +156,7 @@ class _AnimatedMvControllerState extends State<AnimatedMvController>
   Widget _buildBottomIndicator(BuildContext context) {
     double progress;
     final playerValue = VideoPlayerModel.of(context).playerValue;
-    if (playerValue.initialized) {
+    if (playerValue.isInitialized) {
       progress = playerValue.position.inMilliseconds /
           playerValue.duration.inMilliseconds;
     }

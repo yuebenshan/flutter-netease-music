@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info/package_info.dart';
 import 'package:quiet/component.dart';
 import 'package:quiet/model.dart';
 import 'package:quiet/pages/account/account.dart';
@@ -29,15 +32,16 @@ class UserProfileSection extends StatelessWidget {
           // );
         },
         child: Container(
-          height: 72,
+          height: 50,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(width: 8),
-              CircleAvatar(
-                backgroundImage: CachedImage(detail.profile.avatarUrl),
-                radius: 20,
-              ),
+              // CircleAvatar(
+              //   backgroundImage: CachedImage(detail.profile.avatarUrl),
+              //   radius: 20,
+              // ),
+              CheckVersion(),
               SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -123,6 +127,74 @@ class UserProfileSection extends StatelessWidget {
               Icon(Icons.chevron_right)
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class CheckVersion extends StatefulWidget{
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return CheckVersionState();
+  }
+}
+
+class CheckVersionState extends State<CheckVersion>{
+
+  bool checkIng = false;
+
+  Future<PackageInfo> _futureBuilderFuture;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _futureBuilderFuture = _gerData();
+  }
+
+  Future<PackageInfo> _gerData() async {
+    return PackageInfo.fromPlatform();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if(checkIng) {
+      Future.delayed(Duration(milliseconds: 100), () {
+        setState(() {});
+      });
+    }
+    Color defaultColor = Colors.deepOrange;
+    Color randomColor = Color.fromRGBO(Random().nextInt(150), Random().nextInt(150), Random().nextInt(150), 1);
+    // TODO: implement build
+    return GestureDetector(
+      onTap: () async {
+        checkIng = true;
+        setState(() {});
+        // await ApiUtil.updateApi(context, true, mustToast: true);
+        Future.delayed(Duration(milliseconds: 1500), () {
+          checkIng = false;
+          setState(() {});
+        });
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        height: 50,
+        width: 50,
+        alignment: Alignment.center,
+        // 左上右下
+        decoration: BoxDecoration(color: checkIng ? randomColor : defaultColor, borderRadius: BorderRadius.circular(30)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("版本", style: TextStyle(fontSize: 12, color: Colors.white),),
+            FutureBuilder<PackageInfo>(
+                future: _futureBuilderFuture,
+                builder: (context, sData) {
+                  return Text("${sData.data?.version??"12"}", style: TextStyle(fontSize: 12, color: Colors.white),);
+                })
+          ],
         ),
       ),
     );

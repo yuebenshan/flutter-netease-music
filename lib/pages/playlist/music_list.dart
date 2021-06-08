@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:music_player/music_player.dart';
 import 'package:overlay_support/overlay_support.dart';
-import 'package:quiet/Utils.dart';
+import 'package:quiet/component/player/interceptors.dart';
 import 'package:quiet/component/route.dart';
 import 'package:quiet/material/IconDownLoad.dart';
 import 'package:quiet/model/model.dart';
@@ -103,6 +103,7 @@ class MusicTileConfiguration extends StatelessWidget {
   };
 
   final String token;
+  final String type;
 
   final List<Music> musics;
 
@@ -129,7 +130,8 @@ class MusicTileConfiguration extends StatelessWidget {
       this.leadingBuilder,
       this.trailingBuilder,
       this.supportAlbumMenu = true,
-      this.remove})
+      this.remove,
+        this.type = ''})
       : this.queue = musics.map((e) => e.metadata).toList(),
         super(key: key);
 
@@ -154,6 +156,7 @@ class MusicTile extends StatelessWidget {
     final list = MusicTileConfiguration.of(context);
     return Container(
       height: 56,
+      padding: EdgeInsets.only(left: 10),
       child: InkWell(
         onTap: () {
           if (list.onMusicTap != null) list.onMusicTap(context, music);
@@ -310,6 +313,9 @@ enum _MusicAction {
   ///添加到歌单
   addToPlaylist,
 
+  /// 取消收藏
+  cancelFav,
+
   ///导航到专辑
   album,
 
@@ -328,35 +334,38 @@ class _IconMore extends StatelessWidget {
         child: Text("下一首播放"),
         value: _MusicAction.addToNext,
       ),
-      PopupMenuItem(
+      PopupMenuItem( // MusicTileConfiguration.of(context).supportAlbumMenu
+          child: Text("所属专辑"),
+          value: _MusicAction.album,
+      ),
+      MusicTileConfiguration.of(context).type == 'my' ? PopupMenuItem(
+        child: Text("取消收藏"),
+        value: _MusicAction.cancelFav,
+      ) : PopupMenuItem(
         child: Text("收藏到歌单"),
         value: _MusicAction.addToPlaylist,
       ),
-      PopupMenuItem(
-        child: Text("评论"),
-        value: _MusicAction.comment,
-      ),
+      // PopupMenuItem(
+      //   child: Text("评论"),
+      //   value: _MusicAction.comment,
+      // ),
     ];
 
-    items.add(PopupMenuItem(
-        child: Text("作者: ${music.artist.map((a) => a.name).join('/')}",
-            maxLines: 1),
-        //如果所有artist的id为0，那么disable这个item
-        enabled: music.artist.fold(0, (c, ar) => c + ar.id) != 0,
-        value: _MusicAction.artists));
+    // items.add(PopupMenuItem(
+    //     child: Text("作者: ${music.artist.map((a) => a.name).join('/')}",
+    //         maxLines: 1),
+    //     //如果所有artist的id为0，那么disable这个item
+    //     enabled: music.artist.fold(0, (c, ar) => c + ar.id) != 0,
+    //     value: _MusicAction.artists));
+    //
 
-    if (MusicTileConfiguration.of(context).supportAlbumMenu) {
-      items.add(PopupMenuItem(
-        child: Text("专辑"),
-        value: _MusicAction.album,
-      ));
-    }
-    if (MusicTileConfiguration.of(context).remove != null) {
-      items.add(PopupMenuItem(
-        child: Text("删除"),
-        value: _MusicAction.delete,
-      ));
-    }
+    //
+    // if (MusicTileConfiguration.of(context).remove != null) {
+    //   items.add(PopupMenuItem(
+    //     child: Text("删除"),
+    //     value: _MusicAction.delete,
+    //   ));
+    // }
     return items;
   }
 
@@ -375,6 +384,15 @@ class _IconMore extends StatelessWidget {
         break;
       case _MusicAction.delete:
         MusicTileConfiguration.of(context).remove(music);
+        break;
+      case _MusicAction.cancelFav:
+        // 取消收藏，删除下载
+        String localUrl = await BackgroundInterceptors.getLocalFile(music.id);
+        if (File(localUrl).existsSync()) {
+          File(localUrl).delete();
+        }
+        MusicTileConfiguration.of(context).remove(music);
+        // 调用取消收藏接口
         break;
       case _MusicAction.addToPlaylist:
         final id = await showDialog(

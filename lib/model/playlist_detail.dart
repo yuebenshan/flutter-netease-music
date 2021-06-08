@@ -58,7 +58,7 @@ class PlaylistDetail {
             artistKey: "ar", albumKey: "al"),
         playlist["creator"],
         playlist["name"],
-        playlist["coverImgUrl"],
+        playlist["coverUrl"],
         playlist["trackCount"],
         playlist["description"],
         playlist["subscribed"],

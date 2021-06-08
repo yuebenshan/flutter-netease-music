@@ -257,7 +257,7 @@ class MvPlayPauseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = VideoPlayerModel.of(context).videoPlayerController;
 
-    final reachEnd = controller.value.initialized && controller.value.position >= controller.value.duration;
+    final reachEnd = controller.value.isInitialized && controller.value.position >= controller.value.duration;
     final isPlaying = controller.value.isPlaying && !reachEnd;
 
     return Center(

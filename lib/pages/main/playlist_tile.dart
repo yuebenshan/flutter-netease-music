@@ -29,7 +29,7 @@ class PlaylistTile extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(4)),
         child: FadeInImage(
           placeholder: AssetImage("assets/playlist_playlist.9.png"),
-          image: CachedImage(playlist.coverUrl),
+          image: CachedImage(playlist.coverUrl??'https://p2.music.126.net/dvhr5zDhvf_CM2uEnbUOSQ==/109951166065082005.jpg'),
           fit: BoxFit.cover,
           height: 50,
           width: 50,
@@ -76,13 +76,20 @@ class PlaylistTile extends StatelessWidget {
               PopupMenuButton<PlaylistOp>(
                 itemBuilder: (context) {
                   return [
-                    PopupMenuItem(child: Text("分享"), value: PlaylistOp.share),
-                    PopupMenuItem(child: Text("编辑歌单信息"), value: PlaylistOp.edit),
-                    PopupMenuItem(child: Text("删除"), value: PlaylistOp.delete),
+                    // PopupMenuItem(child: Text("分享"), value: PlaylistOp.share),
+                    // PopupMenuItem(child: Text("编辑歌单信息"), value: PlaylistOp.edit),
+                    // PopupMenuItem(child: Text("删除"), value: PlaylistOp.delete),
+                    PopupMenuItem(child: Text("全部下载"), value: PlaylistOp.allDownLoad),
+                    PopupMenuItem(child: Text("取消收藏"), value: PlaylistOp.delete),
                   ];
                 },
                 onSelected: (op) {
                   switch (op) {
+                    case PlaylistOp.allDownLoad:
+                      // playlist
+                      // playlist.musicList 单个下载或批量下载
+                      // 全部下载 并 全部收藏
+                      break;
                     case PlaylistOp.delete:
                     case PlaylistOp.share:
                       toast("未接入。");
@@ -103,4 +110,4 @@ class PlaylistTile extends StatelessWidget {
   }
 }
 
-enum PlaylistOp { edit, share, delete }
+enum PlaylistOp { edit, share, delete, allDownLoad }
