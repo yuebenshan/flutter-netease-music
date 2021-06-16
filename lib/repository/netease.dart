@@ -85,6 +85,24 @@ class NeteaseRepository {
     jar.saveFromResponse(Uri.parse('http://music.163.com'), cookies);
   }
 
+  /// 拿种类列表
+  Future<Result<Map>> getPinnedCategoryList() async {
+    return await doRequest("/getPinnedCategoryList", {"n": 1000});
+  }
+  /// 按分类：返回指定分类下的20条音频，按标题升序排列
+  Future<Result<Map>> getAudioListCategory(termId) async {
+    return await doRequest("/getAudioListCategory", {"n": 1000});
+  }
+  /// 最新：返回最新20条音频，按日期倒序排列
+  Future<Result<Map>> getAudioListNew(loadNumber) async {
+    return await doRequest("/getAudioListNew", {"loadNumber": loadNumber, "n": 1000});
+  }
+  /// ///////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////
   ///使用手机号码登录
   Future<Result<Map>> login(String phone, String password) async {
     return await doRequest("/login/cellphone", {"phone": phone, "password": password});

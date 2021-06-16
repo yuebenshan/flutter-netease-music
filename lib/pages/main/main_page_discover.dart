@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:quiet/generated/json/base/json_convert_content.dart';
+import 'package:quiet/model/category_entity.dart';
 import 'package:quiet/model/playlist_detail.dart';
 import 'package:quiet/pages/main/my/_playlists.dart';
 import 'package:quiet/pages/main/playlist_tile.dart';
@@ -13,23 +15,52 @@ class MainPageDiscover extends StatefulWidget {
   State<StatefulWidget> createState() => CloudPageState();
 }
 
-class CloudPageState extends State<MainPageDiscover> with AutomaticKeepAliveClientMixin {
+class CloudPageState extends State<MainPageDiscover> with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   @override
   bool get wantKeepAlive => true;
+  TabController _tabController;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ListView(
-      children: <Widget>[
-        _NavigationLine(),
-        _Header("最新文章", () {}),
-        SectionNewSongs(),
-        // _Header("最新专辑", () {}),
-        // SectionPlaylist(limit: 6,),
-        // _Header("最新选集", () {}),
-        // SectionPlaylist(limit: 6,),
-      ],
+    return Loader<Map>(
+      loadTask: () => neteaseRepository.getPinnedCategoryList(),
+      builder: (context, result) {
+        List<CategoryEntity> pinnedCategoryList = (result['pinnedCategoryList'] as List).map((e) => JsonConvert.fromJsonAsT<CategoryEntity>(e)).toList();
+        pinnedCategoryList.insert(0, JsonConvert.fromJsonAsT<CategoryEntity>({
+          'name': '最新',
+          'termId': -1
+        }));
+        pinnedCategoryList.insert(1, JsonConvert.fromJsonAsT<CategoryEntity>({
+          'name': '热门',
+          'termId': 0
+        }));
+        _tabController = TabController(length: pinnedCategoryList.length, vsync: this);
+        return Column(
+          children: [
+            _NavigationLine(),
+            Container(
+              height: 50,
+              child: TabBar(
+                isScrollable: true,
+                indicatorColor: Theme.of(context).primaryColor,
+                indicatorSize: TabBarIndicatorSize.label,
+                controller: _tabController,
+                tabs: pinnedCategoryList.map((e) => Text('${e.name}', softWrap: false, style: Theme.of(context).textTheme.subtitle1,)).toList(),
+              ),
+            ),
+            Expanded(child: TabBarView(
+              controller: _tabController,
+              children: List.filled(pinnedCategoryList.length, null).asMap().keys.map((e) => SectionNewSongs(category: pinnedCategoryList[e])).toList(),
+            ))
+          ],
+        );
+      }
     );
   }
 }
@@ -271,6 +302,10 @@ class _PlayListItemView extends StatelessWidget {
 }
 
 class SectionNewSongs extends StatelessWidget {
+  final CategoryEntity category;
+
+  const SectionNewSongs({Key key, this.category}) : super(key: key);
+
   Music _mapJsonToMusic(Map json) {
     Map<String, Object> song = json["song"];
     return mapJsonToMusic(song);
@@ -279,7 +314,7 @@ class SectionNewSongs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Loader<Map>(
-      loadTask: () => neteaseRepository.personalizedNewSong(),
+      loadTask: () => (category?.termId??0) > 0 ? neteaseRepository.getAudioListCategory(category?.termId??0) : neteaseRepository.getAudioListNew(1),
       builder: (context, result) {
         List<Music> songs = (result["result"] as List).cast<Map>().map(_mapJsonToMusic).toList();
         return MusicTileConfiguration(
