@@ -44,7 +44,7 @@ class _DailyMusicList extends StatelessWidget {
     return CustomScrollView(
       slivers: <Widget>[
         SliverAppBar(
-          title: Text('文章列表'),
+          title: Text('推荐列表'),
           titleSpacing: 0,
           forceElevated: false,
           elevation: 0,

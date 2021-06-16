@@ -25,8 +25,8 @@ class CloudPageState extends State<MainPageDiscover> with AutomaticKeepAliveClie
         _NavigationLine(),
         _Header("最新文章", () {}),
         SectionNewSongs(),
-        _Header("最新专辑", () {}),
-        SectionPlaylist(limit: 6,),
+        // _Header("最新专辑", () {}),
+        // SectionPlaylist(limit: 6,),
         // _Header("最新选集", () {}),
         // SectionPlaylist(limit: 6,),
       ],
@@ -55,7 +55,7 @@ class _NavigationLine extends StatelessWidget {
               toast('无法获取私人电台数据');
             });
           }),
-          _ItemNavigator(Icons.today, "文章列表", () {
+          _ItemNavigator(Icons.today, "推荐列表", () {
             context.secondaryNavigator.pushNamed(pageDaily);
           }),
           // _ItemNavigator(Icons.show_chart, "排行榜", () {
