@@ -72,30 +72,30 @@ class NeteaseRepository {
 
   Completer<PersistCookieJar> _cookieJar = Completer();
 
-  Future<List<Cookie>> _loadCookies() async {
+  Future<List<Cookie>> _loadCookies({cms: false}) async {
     final jar = await _cookieJar.future;
     if (jar == null) return const [];
-    final uri = Uri.parse('http://music.163.com');
+    final uri = Uri.parse(cms ? 'https://cms2.fsll.tech' : 'http://music.163.com');
     return jar.loadForRequest(uri);
   }
 
-  void _saveCookies(List<Cookie> cookies) async {
+  void _saveCookies(List<Cookie> cookies, {cms: false}) async {
     final jar = await _cookieJar.future;
     if (jar == null) return;
-    jar.saveFromResponse(Uri.parse('http://music.163.com'), cookies);
+    jar.saveFromResponse(Uri.parse(cms ? 'https://cms2.fsll.tech' : 'http://music.163.com'), cookies);
   }
 
   /// 拿种类列表
   Future<Result<Map>> getPinnedCategoryList() async {
-    return await doRequest("/getPinnedCategoryList", {"n": 1000});
+    return await doRequest("/cms2/getPinnedCategoryList", {"n": 1000});
   }
   /// 按分类：返回指定分类下的20条音频，按标题升序排列
   Future<Result<Map>> getAudioListCategory(termId) async {
-    return await doRequest("/getAudioListCategory", {"n": 1000});
+    return await doRequest("/cms2/getAudioListCategory", {"n": 1000});
   }
   /// 最新：返回最新20条音频，按日期倒序排列
   Future<Result<Map>> getAudioListNew(loadNumber) async {
-    return await doRequest("/getAudioListNew", {"loadNumber": loadNumber, "n": 1000});
+    return await doRequest("/cms2/getAudioListNew", {"loadNumber": loadNumber, "n": 1000});
   }
   /// ///////////////////////////////////////////////////////////////////////////////////////
   /// ///////////////////////////////////////////////////////////////////////////////////////
@@ -411,7 +411,7 @@ class NeteaseRepository {
     try {
       // convert all params to string
       final Map<String, String> convertedParams = param.map((k, v) => MapEntry(k.toString(), v.toString()));
-      result = await api.cloudMusicApi(path, parameter: convertedParams, cookie: await _loadCookies());
+      result = await api.cloudMusicApi(path, parameter: convertedParams, cookie: await _loadCookies(cms: path.contains('/cms2/')));
     } catch (e, stacktrace) {
       debugPrint("request error : $e \n $stacktrace");
       return Result.error(e, stacktrace);
@@ -419,7 +419,7 @@ class NeteaseRepository {
     final map = result.body;
 
     if (result.status == 200) {
-      _saveCookies(result.cookie);
+      _saveCookies(result.cookie, cms: path.contains('/cms2/'));
     }
     if (map == null) {
       return Result.error('请求失败了');

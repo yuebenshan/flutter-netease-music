@@ -47,14 +47,14 @@ part 'module/weblog.dart';
 typedef Handler = Future<Answer> Function(Map query, List<Cookie> cookie);
 
 final handles = <String, Handler>{
-  "/getAudioListBasic": getAudioListBasic,
-  "/getAudioListNew": getAudioListNew,
-  "/getAudioListWild": getAudioListWild,
-  "/getAudioListRandom": getAudioListRandom,
-  "/getAudioListCategory": getAudioListCategory,
-  "/getAudioListTag": getAudioListTag,
-  "/getAudioById": getAudioById,
-  "/getPinnedCategoryList": getPinnedCategoryList,
+  "/cms2/getAudioListBasic": getAudioListBasic,
+  "/cms2/getAudioListNew": getAudioListNew,
+  "/cms2/getAudioListWild": getAudioListWild,
+  "/cms2/getAudioListRandom": getAudioListRandom,
+  "/cms2/getAudioListCategory": getAudioListCategory,
+  "/cms2/getAudioListTag": getAudioListTag,
+  "/cms2/getAudioById": getAudioById,
+  "/cms2/getPinnedCategoryList": getPinnedCategoryList,
   /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// ///
   /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// ///
   /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// ///
